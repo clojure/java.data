@@ -12,13 +12,19 @@ Future home of Java beans and properties support from contrib. Currently contain
 ## Extending
 
 ;; Representing an instance of YourJavaClass in a Clojure data structure
+
 (defmethod from-java YourJavaClass [instance]
+
   ; your custom logic for turing this instance into a clojure data structure
+
 )
 
 ;; Constructing an instance of YourJavaClass from a Clojure data structure
+
 (defmethod to-java [YourJavaClass clojure.lang.APersistentMap] [clazz props]
+
   ; your custom logic for constructing an instance from a property map
+
 )
 
 ## License
