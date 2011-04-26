@@ -8,8 +8,16 @@
 
 (ns
   ^{:author "Cosmin Stejerean",
-    :doc "A Clojure interface to sql databases via jdbc."}
-  clojure.java.data)
+    :doc "Support for recursively converting Java beans to Clojure and vice versa."}
+  clojure.java.data
+  (:use [clojure.tools.logging :only (info)]))
+        
+
+(def
+ ^{:dynamic true,
+   :doc "Specify the behavior of missing setters in to-java in the
+ default object case, using one of :ignore, :log, :error"}
+ *to-java-object-missing-setter* :ignore)
 
 (defmulti to-java (fn [destination-type value] [destination-type (class value)]))
 (defmulti from-java class)
@@ -59,7 +67,15 @@
 (defmethod to-java :default [_ value] value)
 
 (defmethod to-java [Enum String] [enum value]
-  (.invoke (.getDeclaredMethod enum "valueOf" (into-array [String])) nil (into-array [value])))
+           (.invoke (.getDeclaredMethod enum "valueOf" (into-array [String])) nil (into-array [value])))
+
+
+(defn- throw-log-or-ignore-missing-setter [key clazz]
+  (let [message (str "Missing setter for " key " in " (.getCanonicalName clazz))]
+    (cond (= *to-java-object-missing-setter* :error)
+          (throw (new NoSuchFieldException message))
+          (= *to-java-object-missing-setter* :log)
+          (info message))))
 
 (defmethod to-java [Object clojure.lang.APersistentMap] [clazz props]
   "Convert a Clojure map to the specified class using reflection to set the properties"
@@ -68,7 +84,7 @@
     (doseq [[key value] props]
       (let [setter (get setter-map (keyword key))]
         (if (nil? setter)
-          (println "WARNING: Cannot set value for " key " because there is no setter.")
+          (throw-log-or-ignore-missing-setter key clazz)
           (apply setter [instance value]))))
     instance))
 
@@ -78,11 +94,10 @@
 
 (defmethod from-java Object [instance]
   "Convert a Java object to a Clojure map"
-  (try
-    (let [clazz (.getClass instance)
-          getter-map (reduce add-getter-fn {} (get-property-descriptors clazz))]
-      (into {} (for [[key getter-fn] (seq getter-map)] [key (getter-fn instance)])))
-    (catch Exception e (println "Error trying to convert " instance e))))
+  (let [clazz (.getClass instance)
+        getter-map (reduce add-getter-fn {} (get-property-descriptors clazz))]
+    (into {} (for [[key getter-fn] (seq getter-map)] [key (getter-fn instance)]))))
+
 
 (doseq [clazz [String Character Byte Short Integer Long Float Double Boolean BigInteger BigDecimal]]
   (derive clazz ::do-not-convert))

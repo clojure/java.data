@@ -8,6 +8,7 @@
 
 (ns clojure.java.test-data
   (:use clojure.java.data)
+  (:use [clojure.tools.logging :only (log* info)])
   (:use clojure.test)
   (:import (clojure.java.data.test Person Address State)))
 
@@ -24,6 +25,31 @@
     (is (= "Dallas" (.. person getAddress getCity)))
     (is (= State/TX (.. person getAddress getState)))
     (is (= "75432" (.. person getAddress getZip)))))
+
+(deftest clojure-to-java-error-on-missing-setter
+  (binding [*to-java-object-missing-setter* :error]
+    (is (thrown-with-msg? NoSuchFieldException #"Missing setter for :foobar in clojure.java.data.test.Person"
+          (to-java Person {:name "Bob" :foobar "Baz"})
+          ))))
+
+(deftest clojure-to-java-ignore-on-missing-setter
+  (binding [*to-java-object-missing-setter* :ignore]
+    (let [person (to-java Person {:name "Bob" :foobar "Baz"})]
+      (is (= "Bob" (.getName person))))))
+
+(defmacro with-temporary-root [[var-name new-value] & body]
+  `(let [current-var# ~var-name]
+     (alter-var-root (var ~var-name) (fn [ignore#] ~new-value))
+     ~@body
+     (alter-var-root (var ~var-name) (fn [ignore#] current-var#)))
+  )
+
+(deftest clojure-to-java-log-on-missing-setter
+  (binding [*to-java-object-missing-setter* :log]
+    (with-temporary-root [log* (fn [log level throwable message]
+                                 (throw (new Exception (str "invoked " level))))]
+      (is (thrown-with-msg? Exception #"invoked :info"
+            (to-java Person {:name "Bob" :foobar "Baz"}))))))
 
 (deftest java-to-clojure
   (let [address (new Address "123 Main St" "Dallas" State/TX "75432")
