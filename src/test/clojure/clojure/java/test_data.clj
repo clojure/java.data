@@ -10,7 +10,7 @@
   (:use clojure.java.data)
   (:use [clojure.tools.logging :only (log* info)])
   (:use clojure.test)
-  (:import (clojure.java.data.test Person Address State)))
+  (:import (clojure.java.data.test Person Address State Primitive)))
 
 (deftest clojure-to-java
   (let [person (to-java Person {:name "Bob" 
@@ -58,3 +58,25 @@
     (is (= 30 (:age person)))
     (is (= "123 Main St" (:line1 (:address person))))
     (is (= "TX" (:state (:address person))))))
+
+(deftest primitives
+  (let [datum {:boolMember true
+               :boolArray [true false]
+               :charMember \H
+               :charArray (map identity "Hello World")
+               :byteMember 127
+               :byteArray [1 2 3]
+               :shortMember 15000
+               :shortArray [13000 14000 15000]
+               :intMember 18000
+               :intArray [1 2 3]
+               :longMember 60000000
+               :longArray [1 2 3]
+               :floatMember 1.5
+               :floatArray [1.5 2.5 3.5]
+               :doubleMember 1.5
+               :doubleArray [1.5 2.0 2.5]
+               :nestedIntArray [[1 2] [3] [4 5 6] []]
+               :stringArray ["Argument" "Vector"]}]
+    (is (= datum
+           (from-java (to-java Primitive datum))))))

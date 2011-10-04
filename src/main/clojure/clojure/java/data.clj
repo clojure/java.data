@@ -61,10 +61,23 @@
       (assoc the-map (keyword name) (make-setter-fn method))
       the-map)))
 
+(defn- add-array-methods [acls]
+  (let [cls (.getComponentType acls)
+        to (fn [_ sequence] (into-array cls (map (partial to-java cls)
+                                                sequence)))
+        from (fn [obj] (map from-java obj))]
+    (.addMethod to-java [acls Iterable] to)
+    (.addMethod from-java acls from)
+    {:to to :from from}))
 
 ;; common to-java definitions
 
-(defmethod to-java :default [_ value] value)
+(defmethod to-java :default [^Class cls value]
+  (if (.isArray cls)
+                                        ; no method for this array type yet
+    ((:to (add-array-methods cls))
+     cls value)
+    value))
 
 (defmethod to-java [Enum String] [enum value]
            (.invoke (.getDeclaredMethod enum "valueOf" (into-array [String])) nil (into-array [value])))
@@ -92,15 +105,38 @@
 
 ;; common from-java definitions
 
-(defmethod from-java Object [instance]
+(defmethod from-java :default [^Object instance]
   "Convert a Java object to a Clojure map"
-  (let [clazz (.getClass instance)
-        getter-map (reduce add-getter-fn {} (get-property-descriptors clazz))]
-    (into {} (for [[key getter-fn] (seq getter-map)] [key (getter-fn instance)]))))
+  (let [clazz (.getClass instance)]
+    (if (.isArray clazz)
+      ((:from (add-array-methods clazz))
+       instance)
+      (let [getter-map (reduce add-getter-fn {} (get-property-descriptors clazz))]
+        (into {} (for [[key getter-fn] (seq getter-map)] [key (getter-fn instance)]))))))
 
 
 (doseq [clazz [String Character Byte Short Integer Long Float Double Boolean BigInteger BigDecimal]]
   (derive clazz ::do-not-convert))
+
+(defmacro ^{:private true} defnumber [box prim prim-getter]
+  `(let [conv# (fn [_# number#]
+                 (~(symbol (str box) "valueOf")
+                  (. number# ~prim-getter)))]
+     (.addMethod to-java [~prim Number] conv#)
+     (.addMethod to-java [~box Number] conv#)))
+
+(defmacro ^{:private true} defnumbers [& boxes]
+  (cons `do
+        (for [box boxes
+              :let [box-cls (resolve box)
+                    prim-cls (.get (.getField box-cls "TYPE")
+                                   box-cls)
+                    _ (assert (class? box-cls) (str box ": no class found"))
+                    _ (assert (class? prim-cls) (str box " has no TYPE field"))
+                    prim-getter (symbol (str (.getName prim-cls) "Value"))]]
+          `(defnumber ~box ~(symbol (str box) "TYPE") ~prim-getter))))
+
+(defnumbers Byte Short Integer Long Float Double)
 
 (defmethod from-java ::do-not-convert [value] value)
 (prefer-method from-java ::do-not-convert Object)
