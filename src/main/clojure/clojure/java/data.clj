@@ -102,7 +102,7 @@
     instance))
 
 ;; feature testing macro, based on suggestion from Chas Emerick:
-(defmacro when-available
+(defmacro ^{:private true} when-available
   [sym & body]
   (try
     (when (resolve sym)
