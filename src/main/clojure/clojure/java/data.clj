@@ -141,8 +141,10 @@
               :let [box-cls (resolve box)
                     prim-cls (.get (.getField box-cls "TYPE")
                                    box-cls)
-                    _ (assert (class? box-cls) (str box ": no class found"))
-                    _ (assert (class? prim-cls) (str box " has no TYPE field"))
+                    ;; Clojure 1.3: (assert (class? box-cls) (str box ": no class found"))
+                    _ (assert (class? box-cls))
+                    ;; Clojure 1.3: (assert (class? prim-cls) (str box " has no TYPE field"))
+                    _ (assert (class? prim-cls))
                     prim-getter (symbol (str (.getName prim-cls) "Value"))]]
           `(defnumber ~box ~(symbol (str box) "TYPE") ~prim-getter))))
 
