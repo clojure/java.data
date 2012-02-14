@@ -109,9 +109,20 @@
       (list* 'do body))
     (catch ClassNotFoundException _#)))
 
+(defmacro ^{:private true} when-not-available
+  [sym & body]
+  (try
+    (when-not (resolve sym)
+      (list* 'do body))
+    (catch ClassNotFoundException _#)))
+
 (when-available
  biginteger
  (defmethod to-java [BigInteger Object] [_ value] (biginteger value)))
+
+(when-not-available
+ biginteger
+ (defmethod to-java [BigInteger Object] [_ value] (bigint value)))
 
 ;; common from-java definitions
 

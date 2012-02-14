@@ -51,9 +51,32 @@
       (is (thrown-with-msg? Exception #"invoked :info"
             (to-java Person {:name "Bob" :foobar "Baz"}))))))
 
+;; feature testing macro, based on suggestion from Chas Emerick:
+(defmacro ^{:private true} when-available
+  [sym & body]
+  (try
+    (when (resolve sym)
+      (list* 'do body))
+    (catch ClassNotFoundException _#)))
+
+(defmacro ^{:private true} when-not-available
+  [sym & body]
+  (try
+    (when-not (resolve sym)
+      (list* 'do body))
+    (catch ClassNotFoundException _#)))
+
+(when-available
+ biginteger
+ (defn- to-BigInteger [v] (biginteger v)))
+
+(when-not-available
+ biginteger
+ (defn- to-BigInteger [v] (bigint v)))
+
 (deftest java-to-clojure
   (let [address (new Address "123 Main St" "Dallas" State/TX "75432")
-        person (from-java (Person. "Bob" (biginteger 30) address))]
+        person (from-java (Person. "Bob" (to-BigInteger 30) address))]
     (is (= "Bob" (:name person)))
     (is (= 30 (:age person)))
     (is (= "123 Main St" (:line1 (:address person))))
