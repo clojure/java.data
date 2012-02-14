@@ -101,7 +101,17 @@
           (apply setter [instance value]))))
     instance))
 
-(defmethod to-java [BigInteger Object] [_ value] (biginteger value))
+;; feature testing macro, based on suggestion from Chas Emerick:
+(defmacro when-available
+  [sym & body]
+  (try
+    (when (resolve sym)
+      (list* 'do body))
+    (catch ClassNotFoundException _#)))
+
+(when-available
+ biginteger
+ (defmethod to-java [BigInteger Object] [_ value] (biginteger value)))
 
 ;; common from-java definitions
 
