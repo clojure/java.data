@@ -27,14 +27,15 @@
 
 ;; getters
 
-(defn- is-getter [method]
-  (and method (= 0 (alength (. method (getParameterTypes))))))
+(defn- is-getter [^java.lang.reflect.Method method]
+  (and method
+       (= 0 (alength ^"[Ljava.lang.Class;" (.getParameterTypes method)))))
 
-(defn- make-getter-fn [method]
+(defn- make-getter-fn [^java.lang.reflect.Method method]
   (fn [instance]
     (from-java (.invoke method instance nil))))
 
-(defn- add-getter-fn [the-map prop-descriptor]
+(defn- add-getter-fn [the-map ^java.beans.PropertyDescriptor prop-descriptor]
   (let [name (.getName prop-descriptor)
         method (.getReadMethod prop-descriptor)]
     (if (and (is-getter method) (not (= "class" name)))
@@ -44,24 +45,24 @@
 
 ;; setters
 
-(defn- is-setter [method]
+(defn- is-setter [^java.lang.reflect.Method method]
   (and method (= 1 (alength (. method (getParameterTypes))))))
 
-(defn- get-setter-type [method]
+(defn- get-setter-type [^java.lang.reflect.Method method]
   (get (.getParameterTypes method) 0))
 
-(defn- make-setter-fn [method]
+(defn- make-setter-fn [^java.lang.reflect.Method method]
     (fn [instance value]
       (.invoke method instance (into-array [(to-java (get-setter-type method) value)]))))
 
-(defn- add-setter-fn [the-map prop-descriptor]
+(defn- add-setter-fn [the-map ^java.beans.PropertyDescriptor prop-descriptor]
   (let [name (.getName prop-descriptor)
         method (.getWriteMethod prop-descriptor)]
     (if (is-setter method)
       (assoc the-map (keyword name) (make-setter-fn method))
       the-map)))
 
-(defn- add-array-methods [acls]
+(defn- add-array-methods [^Class acls]
   (let [cls (.getComponentType acls)
         to (fn [_ sequence] (into-array cls (map (partial to-java cls)
                                                 sequence)))
@@ -79,11 +80,12 @@
      cls value)
     value))
 
-(defmethod to-java [Enum String] [enum value]
-           (.invoke (.getDeclaredMethod enum "valueOf" (into-array [String])) nil (into-array [value])))
+(defmethod to-java [Enum String] [^Class enum value]
+  (.invoke (.getDeclaredMethod enum "valueOf" (into-array [String]))
+           nil (into-array [value])))
 
 
-(defn- throw-log-or-ignore-missing-setter [key clazz]
+(defn- throw-log-or-ignore-missing-setter [key ^Class clazz]
   (let [message (str "Missing setter for " key " in " (.getCanonicalName clazz))]
     (cond (= *to-java-object-missing-setter* :error)
           (throw (new NoSuchFieldException message))
@@ -149,9 +151,9 @@
 (defmacro ^{:private true} defnumbers [& boxes]
   (cons `do
         (for [box boxes
-              :let [box-cls (resolve box)
-                    prim-cls (.get (.getField box-cls "TYPE")
-                                   box-cls)
+              :let [^Class box-cls (resolve box)
+                    ^Class prim-cls (.get (.getField box-cls "TYPE")
+                                          box-cls)
                     ;; Clojure 1.3: (assert (class? box-cls) (str box ": no class found"))
                     _ (assert (class? box-cls))
                     ;; Clojure 1.3: (assert (class? prim-cls) (str box " has no TYPE field"))
@@ -177,7 +179,7 @@
 
 (defmethod to-java [javax.xml.datatype.XMLGregorianCalendar clojure.lang.APersistentMap] [clazz props]
   "Create an XMLGregorianCalendar object given the following keys :year :month :day :hour :minute :second :timezone"
-  (let [instance (.newInstance clazz)
+  (let [^javax.xml.datatype.XMLGregorianCalendar instance (.newInstance clazz)
         undefined javax.xml.datatype.DatatypeConstants/FIELD_UNDEFINED
         getu #(get %1 %2 undefined)]
     (doto instance
@@ -189,7 +191,8 @@
       (.setSecond (getu props :second))
       (.setTimezone (getu props :timezone)))))
 
-(defmethod from-java javax.xml.datatype.XMLGregorianCalendar [obj]
+(defmethod from-java javax.xml.datatype.XMLGregorianCalendar
+  [^javax.xml.datatype.XMLGregorianCalendar obj]
   "Turn an XMLGregorianCalendar object into a clojure map of year, month, day, hour, minute, second and timezone "
   (let [date {:year (.getYear obj)
               :month (.getMonth obj)
