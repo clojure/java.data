@@ -17,6 +17,7 @@
    :dynamic true,
    :line 16,
    :var-type "var",
+   :arglists nil,
    :doc
    "Specify the behavior of missing setters in to-java in the\ndefault object case, using one of :ignore, :log, :error",
    :namespace "clojure.java.data",
