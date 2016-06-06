@@ -3,8 +3,7 @@
    "Support for recursively converting Java beans to Clojure and vice versa.",
    :author "Cosmin Stejerean",
    :name "clojure.java.data",
-   :wiki-url
-   "http://clojure.github.com/java.data/clojure.java.data-api.html",
+   :wiki-url "http://clojure.github.io/java.data/index.html",
    :source-url
    "https://github.com/clojure/java.data/blob/92937d1eff36c847581ec391deebe5ba6b029fc5/src/main/clojure/clojure/java/data.clj"}),
  :vars
@@ -22,4 +21,4 @@
    "Specify the behavior of missing setters in to-java in the\ndefault object case, using one of :ignore, :log, :error",
    :namespace "clojure.java.data",
    :wiki-url
-   "http://clojure.github.com/java.data//clojure.java.data-api.html#clojure.java.data/*to-java-object-missing-setter*"})}
+   "http://clojure.github.io/java.data//index.html#clojure.java.data/*to-java-object-missing-setter*"})}
