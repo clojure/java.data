@@ -11,7 +11,7 @@
     :doc "Support for recursively converting Java beans to Clojure and vice versa."}
   clojure.java.data
   (:use [clojure.tools.logging :only (info)]))
-        
+
 
 (def
  ^{:dynamic true,
@@ -136,7 +136,7 @@
         (into {} (for [[key getter-fn] (seq getter-map)] [key (getter-fn instance)]))))))
 
 
-(doseq [clazz [String Character Byte Short Integer Long Float Double Boolean BigInteger BigDecimal]]
+(doseq [clazz [String Character Byte Short Integer Long Float Double Boolean BigInteger BigDecimal java.util.Date]]
   (derive clazz ::do-not-convert))
 
 (defmacro ^{:private true} defnumber [box prim prim-getter]

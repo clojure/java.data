@@ -13,11 +13,11 @@
   (:import (clojure.java.data.test Person Address State Primitive)))
 
 (deftest clojure-to-java
-  (let [person (to-java Person {:name "Bob" 
-                                :age 30 
-                                :address {:line1 "123 Main St" 
-                                          :city "Dallas" 
-                                          :state "TX" 
+  (let [person (to-java Person {:name "Bob"
+                                :age 30
+                                :address {:line1 "123 Main St"
+                                          :city "Dallas"
+                                          :state "TX"
                                           :zip "75432"}})]
     (is (= "Bob" (.getName person)))
     (is (= 30 (.getAge person)))
@@ -103,3 +103,8 @@
                :stringArray ["Argument" "Vector"]}]
     (is (= datum
            (from-java (to-java Primitive datum))))))
+
+(deftest date
+  (let [d (java.util.Date.)]
+    (is (= (from-java d) d))
+    (is (= (to-java java.util.Date d) d))))
