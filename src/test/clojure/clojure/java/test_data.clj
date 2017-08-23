@@ -10,7 +10,7 @@
   (:use clojure.java.data)
   (:use [clojure.tools.logging :only (log* info)])
   (:use clojure.test)
-  (:import (clojure.java.data.test Person Address State Primitive)))
+  (:import (clojure.java.data.test Person Address State Primitive BooleanTest)))
 
 (deftest clojure-to-java
   (let [person (to-java Person {:name "Bob" 
@@ -103,3 +103,10 @@
                :stringArray ["Argument" "Vector"]}]
     (is (= datum
            (from-java (to-java Primitive datum))))))
+
+(deftest booleans-from-java
+  (let [java-datum (new BooleanTest)]
+    (is (= :false (if (:boolMember (from-java java-datum))
+                        :true
+                        :false)))))
+

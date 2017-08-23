@@ -32,7 +32,8 @@
 
 (defn- make-getter-fn [method]
   (fn [instance]
-    (from-java (.invoke method instance nil))))
+    (clojure.lang.Reflector/prepRet (.getReturnType method) 
+                                    (from-java (.invoke method instance nil)))))
 
 (defn- add-getter-fn [the-map prop-descriptor]
   (let [name (.getName prop-descriptor)
