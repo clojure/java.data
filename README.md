@@ -52,6 +52,20 @@ Constructing an instance of YourJavaClass from a Clojure data structure
 )
 ```
 
+## Feature comparison to `clojure.core/bean`
+
+Clojure core provides a `bean` function which has some overlap with java.data. Below is a more detailed comparison:
+
+Dimension | `bean` | `java.data`
+-- | ------ | -----------
+find fields	| bean introspector	| bean introspector -  "class"
+depth       | 1	                | recursive without cycle detection
+field names	| keyword           | keyword
+extensibility | none            | multimethod on class
+special casing | none           | arrays, iterable, maps, enums, XMLGregorianCalendar
+map keys    | unhandled	        | untouched
+exception defense | none        | none
+
 ## Developer Information
 
 * [GitHub project](https://github.com/clojure/java.data)
