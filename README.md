@@ -40,7 +40,7 @@ Representing an instance of YourJavaClass in a Clojure data structure
 
 ```
 (defmethod from-java YourJavaClass [instance]
-  ; your custom logic for turing this instance into a clojure data structure
+  ; your custom logic for turning this instance into a clojure data structure
 )
 ```
 
@@ -80,7 +80,7 @@ exception defense | none        | none
 
 * Release 0.1.1 on 2012-04-29
   * Initial release.
-  * Clojure 1.2 compatiblity
+  * Clojure 1.2 compatibility
 
 ## Copyright and License
 
