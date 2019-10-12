@@ -6,30 +6,30 @@ clojure-contrib
 
 ## Releases and Dependency Information
 
-Latest stable release: 0.1.1
+Latest stable release: 0.1.2
 
 * [All Released Versions](http://search.maven.org/#search%7Cga%7C1%7Corg.clojure%20java.data)
 * [Development Snapshot Versions](https://repository.sonatype.org/index.html#nexus-search;gav~org.clojure~java.data~~~)
 
 ### Leiningen
 
-```
-[org.clojure/java.data "0.1.1"]
+```clojure
+[org.clojure/java.data "0.1.2"]
 ```
 
 ### Maven
 
-```
+```xml
 <dependency>
     <groupId>org.clojure</groupId>
     <artifactId>java.data</artifactId>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
 </dependency>
 ```
 
 ## Example Usage
 
-```
+```clojure
 (use 'clojure.java.data)
 
 (to-java YourJavaClass clojure-property-map)
@@ -38,7 +38,7 @@ Latest stable release: 0.1.1
 
 Representing an instance of YourJavaClass in a Clojure data structure
 
-```
+```clojure
 (defmethod from-java YourJavaClass [instance]
   ; your custom logic for turning this instance into a clojure data structure
 )
@@ -46,7 +46,7 @@ Representing an instance of YourJavaClass in a Clojure data structure
 
 Constructing an instance of YourJavaClass from a Clojure data structure
 
-```
+```clojure
 (defmethod to-java [YourJavaClass clojure.lang.APersistentMap] [clazz props]
   ; your custom logic for constructing an instance from a property map
 )
@@ -78,9 +78,12 @@ exception defense | none        | none
 
 ## Change Log
 
+* Release 0.1.2 on 2019-10-12
+  * Fix reflection warnings JDATA-2 and JDATA-13.
+
 * Release 0.1.1 on 2012-04-29
   * Initial release.
-  * Clojure 1.2 compatibility
+  * Clojure 1.2 compatibility.
 
 ## Copyright and License
 
