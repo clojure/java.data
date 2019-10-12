@@ -11,7 +11,8 @@
     :doc "Support for recursively converting Java beans to Clojure and vice versa."}
   clojure.java.data
   (:use [clojure.tools.logging :only (info)]))
-        
+
+(set! *warn-on-reflection* true)
 
 (def
  ^{:dynamic true,
@@ -67,8 +68,8 @@
         to (fn [_ sequence] (into-array cls (map (partial to-java cls)
                                                 sequence)))
         from (fn [obj] (map from-java obj))]
-    (.addMethod to-java [acls Iterable] to)
-    (.addMethod from-java acls from)
+    (.addMethod ^clojure.lang.MultiFn to-java [acls Iterable] to)
+    (.addMethod ^clojure.lang.MultiFn from-java acls from)
     {:to to :from from}))
 
 ;; common to-java definitions
@@ -92,7 +93,7 @@
           (= *to-java-object-missing-setter* :log)
           (info message))))
 
-(defmethod to-java [Object clojure.lang.APersistentMap] [clazz props]
+(defmethod to-java [Object clojure.lang.APersistentMap] [^Class clazz props]
   "Convert a Clojure map to the specified class using reflection to set the properties"
   (let [instance (.newInstance clazz)
         setter-map (reduce add-setter-fn {} (get-property-descriptors clazz))]
@@ -142,11 +143,11 @@
   (derive clazz ::do-not-convert))
 
 (defmacro ^{:private true} defnumber [box prim prim-getter]
-  `(let [conv# (fn [_# number#]
+  `(let [conv# (fn [_# ^Number number#]
                  (~(symbol (str box) "valueOf")
                   (. number# ~prim-getter)))]
-     (.addMethod to-java [~prim Number] conv#)
-     (.addMethod to-java [~box Number] conv#)))
+     (.addMethod ^clojure.lang.MultiFn to-java [~prim Number] conv#)
+     (.addMethod ^clojure.lang.MultiFn to-java [~box Number] conv#)))
 
 (defmacro ^{:private true} defnumbers [& boxes]
   (cons `do
@@ -177,13 +178,19 @@
 
 ;; definitions for interfacting with XMLGregorianCalendar
 
-(defmethod to-java [javax.xml.datatype.XMLGregorianCalendar clojure.lang.APersistentMap] [clazz props]
+(defmethod to-java [javax.xml.datatype.XMLGregorianCalendar clojure.lang.APersistentMap] [^Class clazz props]
   "Create an XMLGregorianCalendar object given the following keys :year :month :day :hour :minute :second :timezone"
   (let [^javax.xml.datatype.XMLGregorianCalendar instance (.newInstance clazz)
         undefined javax.xml.datatype.DatatypeConstants/FIELD_UNDEFINED
-        getu #(get %1 %2 undefined)]
+        getu #(get %1 %2 undefined)
+        y (getu props :year)]
+    ;; .setYear is unique in having an overload on int and BigInteger
+    ;; whereas the other setters only have an int version so avoiding
+    ;; reflection means special treatment for .setYear
+    (if (instance? BigInteger y)
+      (.setYear instance ^BigInteger y)
+      (.setYear instance ^int y))
     (doto instance
-      (.setYear (getu props :year))
       (.setMonth (getu props :month))
       (.setDay (getu props :day))
       (.setHour (getu props :hour))
