@@ -201,6 +201,8 @@
 (prefer-method from-java java.util.Map Iterable)
 
 (defmethod from-java nil [_] nil)
+(defmethod from-java java.sql.SQLException [^Object ex]
+  ((get-method from-java :default) ex))
 (defmethod from-java Boolean [value] (boolean value))
 (defmethod from-java Enum [enum] (str enum))
 

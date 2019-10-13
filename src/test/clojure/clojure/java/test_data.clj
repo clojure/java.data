@@ -135,3 +135,15 @@
 (deftest jdata-10
   (is (if (:absolute (from-java (java.net.URI. ""))) false true))
   (is (if (:opaque (from-java (java.net.URI. ""))) false true)))
+
+(deftest jdata-12
+  (let [eek1 (java.sql.SQLException. "SQL 1")
+        eek2 (java.sql.SQLException. "SQL 2")
+        eek3 (java.sql.SQLException. "SQL 3")]
+    (.setNextException eek1 eek2)
+    (.setNextException eek2 eek3)
+    (let [ex (from-java eek1)]
+      (is (= "SQL 1" (get-in ex [:message])))
+      (is (= "SQL 2" (get-in ex [:nextException :message])))
+      (is (= "SQL 3" (get-in ex [:nextException :nextException :message])))
+      (is (nil? (get-in ex [:nextException :nextException :nextException]))))))
