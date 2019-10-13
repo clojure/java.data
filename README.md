@@ -80,6 +80,7 @@ exception defense | none        | none
 
 * Unreleased version (master)
   * Fix `java.util.Map`/Clojure hash map setter handling JDATA-6.
+  * Fix `Boolean` conversion JDATA-10.
 
 * Release 0.1.2 on 2019-10-12
   * Fix reflection warnings JDATA-2 and JDATA-13.

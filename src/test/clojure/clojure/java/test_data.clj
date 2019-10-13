@@ -121,3 +121,7 @@
   (deftest jdata-8-11-instant
     (let [t (java.time.Instant/now)]
       (is (= t (to-java java.time.Instant (from-java t)))))))
+
+(deftest jdata-10
+  (is (if (:absolute (from-java (java.net.URI. ""))) false true))
+  (is (if (:opaque (from-java (java.net.URI. ""))) false true)))

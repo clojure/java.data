@@ -166,7 +166,7 @@
         (into {} (for [[key getter-fn] (seq getter-map)] [key (getter-fn instance)]))))))
 
 
-(doseq [clazz [String Character Byte Short Integer Long Float Double Boolean BigInteger BigDecimal]]
+(doseq [clazz [String Character Byte Short Integer Long Float Double BigInteger BigDecimal]]
   (derive clazz ::do-not-convert))
 
 (defmacro ^{:private true} defnumber [box prim prim-getter]
@@ -201,6 +201,7 @@
 (prefer-method from-java java.util.Map Iterable)
 
 (defmethod from-java nil [_] nil)
+(defmethod from-java Boolean [value] (boolean value))
 (defmethod from-java Enum [enum] (str enum))
 
 ;; definitions for interfacting with XMLGregorianCalendar
