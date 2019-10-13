@@ -18,6 +18,9 @@
       <developer>
         <name>Cosmin Stejerean</name>
       </developer>
+      <developer>
+        <name>Sean Corfield</name>
+      </developer>
     </developers>
 
     <scm>

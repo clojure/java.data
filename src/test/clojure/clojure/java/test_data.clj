@@ -10,14 +10,14 @@
   (:use clojure.java.data)
   (:use [clojure.tools.logging :only (log* info)])
   (:use clojure.test)
-  (:import (clojure.java.data.test Person Address State Primitive)))
+  (:import (clojure.java.data.test Person Address State Primitive TestBean)))
 
 (deftest clojure-to-java
-  (let [person (to-java Person {:name "Bob" 
-                                :age 30 
-                                :address {:line1 "123 Main St" 
-                                          :city "Dallas" 
-                                          :state "TX" 
+  (let [person (to-java Person {:name "Bob"
+                                :age 30
+                                :address {:line1 "123 Main St"
+                                          :city "Dallas"
+                                          :state "TX"
                                           :zip "75432"}})]
     (is (= "Bob" (.getName person)))
     (is (= 30 (.getAge person)))
@@ -29,8 +29,8 @@
 (deftest clojure-to-java-error-on-missing-setter
   (binding [*to-java-object-missing-setter* :error]
     (is (thrown-with-msg? NoSuchFieldException #"Missing setter for :foobar in clojure.java.data.test.Person"
-          (to-java Person {:name "Bob" :foobar "Baz"})
-          ))))
+          (to-java Person {:name "Bob" :foobar "Baz"})))))
+
 
 (deftest clojure-to-java-ignore-on-missing-setter
   (binding [*to-java-object-missing-setter* :ignore]
@@ -41,8 +41,8 @@
   `(let [current-var# ~var-name]
      (alter-var-root (var ~var-name) (fn [ignore#] ~new-value))
      ~@body
-     (alter-var-root (var ~var-name) (fn [ignore#] current-var#)))
-  )
+     (alter-var-root (var ~var-name) (fn [ignore#] current-var#))))
+
 
 (deftest clojure-to-java-log-on-missing-setter
   (binding [*to-java-object-missing-setter* :log]
@@ -103,3 +103,11 @@
                :stringArray ["Argument" "Vector"]}]
     (is (= datum
            (from-java (to-java Primitive datum))))))
+
+(deftest jdata-6
+  (let [bean-instance (TestBean.)
+        _ (. bean-instance setFoo {"bar" "baz"})
+        bean-instance-as-map (from-java bean-instance)
+        new-bean-instance (to-java TestBean bean-instance-as-map)]
+    (is (= {"bar" "baz"} (:foo bean-instance-as-map)))
+    (is (= {"bar" "baz"} (.getFoo new-bean-instance)))))
