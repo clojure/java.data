@@ -6,7 +6,7 @@ clojure-contrib
 
 ## Releases and Dependency Information
 
-Latest stable release: 0.1.3
+Latest stable release: 0.1.4
 
 * [All Released Versions](http://search.maven.org/#search%7Cga%7C1%7Corg.clojure%20java.data)
 * [Development Snapshot Versions](https://repository.sonatype.org/index.html#nexus-search;gav~org.clojure~java.data~~~)
@@ -14,7 +14,7 @@ Latest stable release: 0.1.3
 ### Leiningen
 
 ```clojure
-[org.clojure/java.data "0.1.3"]
+[org.clojure/java.data "0.1.4"]
 ```
 
 ### Maven
@@ -23,7 +23,7 @@ Latest stable release: 0.1.3
 <dependency>
     <groupId>org.clojure</groupId>
     <artifactId>java.data</artifactId>
-    <version>0.1.3</version>
+    <version>0.1.4</version>
 </dependency>
 ```
 
@@ -77,6 +77,9 @@ exception defense | none        | none
 * [Compatibility Test Matrix](http://build.clojure.org/job/java.data-test-matrix/)
 
 ## Change Log
+
+* Release 0.1.4 on 2019-10-13
+  * Fix Clojure hash map conversion problems JDATA-14 (problems introduced in 0.1.3)
 
 * Release 0.1.3 on 2019-10-13
   * Fix `java.util.Map`/Clojure hash map setter handling JDATA-6.

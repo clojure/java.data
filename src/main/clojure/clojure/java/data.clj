@@ -10,7 +10,8 @@
   ^{:author "Cosmin Stejerean",
     :doc "Support for recursively converting Java beans to Clojure and vice versa."}
   clojure.java.data
-  (:use [clojure.tools.logging :only (info)]))
+  (:require [clojure.string :as str]
+            [clojure.tools.logging :as logger]))
 
 (set! *warn-on-reflection* true)
 
@@ -91,7 +92,7 @@
     (cond (= *to-java-object-missing-setter* :error)
           (throw (new NoSuchFieldException message))
           (= *to-java-object-missing-setter* :log)
-          (info message))))
+          (logger/info message))))
 
 ;; feature testing macro, based on suggestion from Chas Emerick:
 (defmacro ^{:private true} when-available
@@ -110,22 +111,6 @@
 
 ;; Clojure hash map conversions
 
-(defmethod to-java [java.lang.Iterable clojure.lang.APersistentMap] [_ props]
-  "A Clojure map is already a java.lang.Iterable"
-  props)
-
-(defmethod to-java [java.util.Map clojure.lang.APersistentMap] [_ ^java.util.Map props]
-  "Convert a Clojure map to a new java.util.HashMap"
-  (java.util.HashMap. props))
-
-(defmethod to-java [java.util.concurrent.Callable clojure.lang.APersistentMap] [_ props]
-    "A Clojure map is already a java.util.concurrent.Callable"
-    props)
-
-(defmethod to-java [java.lang.Runnable clojure.lang.APersistentMap] [_ props]
-  "A Clojure map is already a java.lang.Runnable"
-  props)
-
 (when-available
   java.time.Instant
   (defmethod to-java [java.time.Instant clojure.lang.APersistentMap] [_ props]
@@ -136,15 +121,33 @@
 
 (defmethod to-java [Object clojure.lang.APersistentMap] [^Class clazz props]
   "Convert a Clojure map to the specified class using reflection to set the
-  properties"
-  (let [instance (.newInstance clazz)
-        setter-map (reduce add-setter-fn {} (get-property-descriptors clazz))]
-    (doseq [[key value] props]
-      (let [setter (get setter-map (keyword key))]
-        (if (nil? setter)
-          (throw-log-or-ignore-missing-setter key clazz)
-          (apply setter [instance value]))))
-    instance))
+  properties. If the class is an interface, we can't create an instance of
+  it, unless the Clojure map already implements it."
+  (if (.isInterface clazz)
+    (if (instance? clazz props)
+      (condp = clazz
+        ;; make a fresh (mutabl) hash map from the Clojure map
+        java.util.Map (java.util.HashMap. ^java.util.Map props)
+        ;; Iterable, Serializable, Runnable, Callable
+        ;; we should probably figure out actual objects to create...
+        props)
+      (throw (IllegalArgumentException.
+               (str (.getName clazz) " is an interface "
+                    "and cannot be constructed from "
+                    (str/join ", " (map name (keys props)))))))
+    (let [instance (try (.newInstance clazz)
+                     (catch Throwable t
+                       (throw (IllegalArgumentException.
+                                (str (.getName clazz)
+                                     " cannot be constructed")
+                                t))))
+          setter-map (reduce add-setter-fn {} (get-property-descriptors clazz))]
+      (doseq [[key value] props]
+        (let [setter (get setter-map (keyword key))]
+          (if (nil? setter)
+            (throw-log-or-ignore-missing-setter key clazz)
+            (apply setter [instance value]))))
+      instance)))
 
 (when-available
  biginteger
