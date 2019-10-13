@@ -93,40 +93,6 @@
           (= *to-java-object-missing-setter* :log)
           (info message))))
 
-;; Clojure hash map conversions
-
-(defmethod to-java [java.lang.Iterable clojure.lang.APersistentMap] [_ props]
-  "A Clojure map is already a java.lang.Iterable"
-  props)
-
-(defmethod to-java [java.io.Serializable clojure.lang.APersistentMap] [_ props]
-  "A Clojure map is already a java.io.Serializable"
-  props)
-
-(defmethod to-java [java.util.Map clojure.lang.APersistentMap] [_ ^java.util.Map props]
-  "Convert a Clojure map to a new java.util.HashMap"
-  (java.util.HashMap. props))
-
-(defmethod to-java [java.util.concurrent.Callable clojure.lang.APersistentMap] [_ clazz props]
-  "A Clojure map is already a java.util.concurrent.Callable"
-  props)
-
-(defmethod to-java [java.lang.Runnable clojure.lang.APersistentMap] [_ clazz props]
-  "A Clojure map is already a java.lang.Runnable"
-  props)
-
-(defmethod to-java [Object clojure.lang.APersistentMap] [^Class clazz props]
-  "Convert a Clojure map to the specified class using reflection to set the
-  properties"
-  (let [instance (.newInstance clazz)
-        setter-map (reduce add-setter-fn {} (get-property-descriptors clazz))]
-    (doseq [[key value] props]
-      (let [setter (get setter-map (keyword key))]
-        (if (nil? setter)
-          (throw-log-or-ignore-missing-setter key clazz)
-          (apply setter [instance value]))))
-    instance))
-
 ;; feature testing macro, based on suggestion from Chas Emerick:
 (defmacro ^{:private true} when-available
   [sym & body]
@@ -141,6 +107,44 @@
     (when-not (resolve sym)
       (list* 'do body))
     (catch ClassNotFoundException _#)))
+
+;; Clojure hash map conversions
+
+(defmethod to-java [java.lang.Iterable clojure.lang.APersistentMap] [_ props]
+  "A Clojure map is already a java.lang.Iterable"
+  props)
+
+(defmethod to-java [java.util.Map clojure.lang.APersistentMap] [_ ^java.util.Map props]
+  "Convert a Clojure map to a new java.util.HashMap"
+  (java.util.HashMap. props))
+
+(defmethod to-java [java.util.concurrent.Callable clojure.lang.APersistentMap] [_ props]
+    "A Clojure map is already a java.util.concurrent.Callable"
+    props)
+
+(defmethod to-java [java.lang.Runnable clojure.lang.APersistentMap] [_ props]
+  "A Clojure map is already a java.lang.Runnable"
+  props)
+
+(when-available
+  java.time.Instant
+  (defmethod to-java [java.time.Instant clojure.lang.APersistentMap] [_ props]
+    "Instant->map produces :nano, :epochSecond so do the reverse"
+    (when-not (and (:nano props) (:epochSecond props))
+      (throw (IllegalArgumentException. "java.time.Instant requires :nano and :epochSecond")))
+    (java.time.Instant/ofEpochSecond (:epochSecond props) (:nano props))))
+
+(defmethod to-java [Object clojure.lang.APersistentMap] [^Class clazz props]
+  "Convert a Clojure map to the specified class using reflection to set the
+  properties"
+  (let [instance (.newInstance clazz)
+        setter-map (reduce add-setter-fn {} (get-property-descriptors clazz))]
+    (doseq [[key value] props]
+      (let [setter (get setter-map (keyword key))]
+        (if (nil? setter)
+          (throw-log-or-ignore-missing-setter key clazz)
+          (apply setter [instance value]))))
+    instance))
 
 (when-available
  biginteger

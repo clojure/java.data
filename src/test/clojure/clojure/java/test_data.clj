@@ -111,3 +111,13 @@
         new-bean-instance (to-java TestBean bean-instance-as-map)]
     (is (= {"bar" "baz"} (:foo bean-instance-as-map)))
     (is (= {"bar" "baz"} (.getFoo new-bean-instance)))))
+
+(deftest jdata-8-11-date
+  (let [d (java.util.Date.)]
+    (is (= d (to-java java.util.Date (from-java d))))))
+
+(when-available
+  java.time.Instant
+  (deftest jdata-8-11-instant
+    (let [t (java.time.Instant/now)]
+      (is (= t (to-java java.time.Instant (from-java t)))))))
