@@ -6,7 +6,7 @@ clojure-contrib
 
 ## Releases and Dependency Information
 
-Latest stable release: 0.1.2
+Latest stable release: 0.1.3
 
 * [All Released Versions](http://search.maven.org/#search%7Cga%7C1%7Corg.clojure%20java.data)
 * [Development Snapshot Versions](https://repository.sonatype.org/index.html#nexus-search;gav~org.clojure~java.data~~~)
@@ -14,7 +14,7 @@ Latest stable release: 0.1.2
 ### Leiningen
 
 ```clojure
-[org.clojure/java.data "0.1.2"]
+[org.clojure/java.data "0.1.3"]
 ```
 
 ### Maven
@@ -23,7 +23,7 @@ Latest stable release: 0.1.2
 <dependency>
     <groupId>org.clojure</groupId>
     <artifactId>java.data</artifactId>
-    <version>0.1.2</version>
+    <version>0.1.3</version>
 </dependency>
 ```
 
@@ -36,7 +36,7 @@ Latest stable release: 0.1.2
 (from-java javaValue)
 ```
 
-Representing an instance of YourJavaClass in a Clojure data structure
+Representing an instance of `YourJavaClass` in a Clojure data structure
 
 ```clojure
 (defmethod from-java YourJavaClass [instance]
@@ -44,7 +44,7 @@ Representing an instance of YourJavaClass in a Clojure data structure
 )
 ```
 
-Constructing an instance of YourJavaClass from a Clojure data structure
+Constructing an instance of `YourJavaClass` from a Clojure data structure
 
 ```clojure
 (defmethod to-java [YourJavaClass clojure.lang.APersistentMap] [clazz props]
@@ -62,7 +62,7 @@ find fields	| bean introspector	| bean introspector -  "class"
 depth       | 1	                | recursive without cycle detection
 field names	| keyword           | keyword
 extensibility | none            | multimethod on class
-special casing | none           | arrays, iterable, maps, enums, XMLGregorianCalendar
+special casing | none           | arrays, iterable, maps, enums, Instant, SQLException, XMLGregorianCalendar
 map keys    | unhandled	        | untouched
 exception defense | none        | none
 
@@ -78,7 +78,7 @@ exception defense | none        | none
 
 ## Change Log
 
-* Unreleased version (master)
+* Release 0.1.3 on 2019-10-13
   * Fix `java.util.Map`/Clojure hash map setter handling JDATA-6.
   * Fix `Boolean` conversion JDATA-10.
   * Fix `SQLException` handling JDATA-12.
