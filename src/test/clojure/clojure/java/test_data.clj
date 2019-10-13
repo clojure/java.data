@@ -10,7 +10,8 @@
   (:use clojure.java.data)
   (:use [clojure.tools.logging :only (log* info)])
   (:use clojure.test)
-  (:import (clojure.java.data.test Person Address State Primitive TestBean)))
+  (:import (clojure.java.data.test Person Address State Primitive
+                                   TestBean6 TestBean9)))
 
 (deftest clojure-to-java
   (let [person (to-java Person {:name "Bob"
@@ -105,10 +106,10 @@
            (from-java (to-java Primitive datum))))))
 
 (deftest jdata-6
-  (let [bean-instance (TestBean.)
+  (let [bean-instance (TestBean6.)
         _ (. bean-instance setFoo {"bar" "baz"})
         bean-instance-as-map (from-java bean-instance)
-        new-bean-instance (to-java TestBean bean-instance-as-map)]
+        new-bean-instance (to-java TestBean6 bean-instance-as-map)]
     (is (= {"bar" "baz"} (:foo bean-instance-as-map)))
     (is (= {"bar" "baz"} (.getFoo new-bean-instance)))))
 
@@ -121,6 +122,15 @@
   (deftest jdata-8-11-instant
     (let [t (java.time.Instant/now)]
       (is (= t (to-java java.time.Instant (from-java t)))))))
+
+(deftest jdata-9
+  (let [bean-instance (TestBean9.)
+        _ (.setAString bean-instance "something")
+        _ (.setABool bean-instance true)
+        _ (.setABoolean bean-instance false)]
+    (is (= {:AString "something" :ABool true}
+           ;; :ABoolean missing because 'is' Boolean is not a getter
+           (from-java bean-instance)))))
 
 (deftest jdata-10
   (is (if (:absolute (from-java (java.net.URI. ""))) false true))

@@ -1,7 +1,7 @@
 package clojure.java.data.test;
 import java.util.Map;
 
-public class TestBean {
+public class TestBean6 {
 
     private java.util.Map foo;
 
