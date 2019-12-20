@@ -72,6 +72,44 @@
     (.addMethod ^clojure.lang.MultiFn from-java acls from)
     {:to to :from from}))
 
+;; constructor support
+
+(defn- find-matching-constructors [^Class clazz args]
+  (let [n (count args)]
+    (filter (fn [^java.lang.reflect.Constructor ctr]
+              (and (= n (.getParameterCount ctr))
+                   (let [pts (map vector (.getParameterTypes ctr) args)]
+                     (every? (fn [[^Class pt arg]]
+                               ;; watch out for boxed types in Clojure
+                               ;; passed to primitive constructor parameters
+                               (cond (.isPrimitive pt)
+                                     (and arg ; cannot pass nil to primitive
+                                          (or (instance? Number arg)
+                                              (instance? Boolean arg)))
+                                     (nil? arg)
+                                     true ; null is assignable to any non-primitive
+                                     :else
+                                     (.isAssignableFrom pt (class arg))))
+                             pts))))
+            (.getConstructors clazz))))
+
+(defn- find-constructor ^java.lang.reflect.Constructor [^Class clazz args]
+  (let [candidates (find-matching-constructors clazz args)]
+    (condp = (count candidates)
+           0 (throw (IllegalArgumentException.
+                     (str (.getName clazz) " has no matching constructor"
+                          " for the given argument list")))
+           1 (first candidates)
+           (throw (IllegalArgumentException.
+                   (str (.getName clazz) " constructor is ambiguous"
+                        " for the given argument list"))))))
+
+(comment
+  (find-constructor String ["arg"])
+  (find-constructor String [(.getBytes "arg")])
+  (find-constructor String [(.getBytes "arg") (int 0) (int 3)])
+  (find-constructor String ["too" "many" "arguments"]))
+
 ;; common to-java definitions
 
 (defmethod to-java :default [^Class cls value]
@@ -147,7 +185,12 @@
               (str (.getName clazz) " is an interface "
                    "and cannot be constructed from "
                    (str/join ", " (map name (keys props)))))))
-    (let [instance (try (.newInstance clazz)
+    (let [ctr-args (::constructor (meta props))
+          ctr      (when ctr-args (find-constructor clazz ctr-args))
+          instance (try
+                     (if ctr
+                       (.newInstance ctr (object-array ctr-args))
+                       (.newInstance clazz))
                      (catch Throwable t
                        (throw (IllegalArgumentException.
                                (str (.getName clazz)
@@ -157,11 +200,11 @@
 
 (when-available
  biginteger
- (defmethod to-java [BigInteger Object] [_ value] (biginteger value)))
+ (defmethod to-java [java.math.BigInteger Object] [_ value] (biginteger value)))
 
 (when-not-available
  biginteger
- (defmethod to-java [BigInteger Object] [_ value] (bigint value)))
+ (defmethod to-java [java.math.BigInteger Object] [_ value] (bigint value)))
 
 ;; set properties on existing objects
 
@@ -181,7 +224,8 @@
       (let [getter-map (reduce add-getter-fn {} (get-property-descriptors clazz))]
         (into {} (for [[key getter-fn] (seq getter-map)] [key (getter-fn instance)]))))))
 
-(doseq [clazz [String Character Byte Short Integer Long Float Double BigInteger BigDecimal]]
+(doseq [clazz [String Character Byte Short Integer Long Float Double
+               java.math.BigInteger java.math.BigDecimal]]
   (derive clazz ::do-not-convert))
 
 (defmacro ^{:private true} defnumber [box prim prim-getter]
@@ -232,8 +276,8 @@
     ;; .setYear is unique in having an overload on int and BigInteger
     ;; whereas the other setters only have an int version so avoiding
     ;; reflection means special treatment for .setYear
-    (if (instance? BigInteger y)
-      (.setYear instance ^BigInteger y)
+    (if (instance? java.math.BigInteger y)
+      (.setYear instance ^java.math.BigInteger y)
       (.setYear instance ^int y))
     (doto instance
       (.setMonth (getu props :month))

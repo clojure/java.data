@@ -35,11 +35,20 @@ Latest stable release: 0.1.4
 ;; construct YourJavaClass instance from Clojure data structure
 ;; (usually a Clojure hash map of properties to set on the instance):
 (j/to-java YourJavaClass clojure-property-map)
+
 ;; represent a javaValue instance in a Clojure data structure:
 (j/from-java javaValue)
+
 ;; populate javaValue instance from a Clojure property hash map
 ;; (calls a setter for each key/value pair in the hash map):
 (j/set-properties javaValue clojure-property-map)
+
+;; provide constructor arguments via metadata:
+(j/to-java YourJavaClass
+  (with-meta clojure-property-map
+    {::j/constructor ["constructor" "arguments"]}))
+;; constructor arguments must match the parameter types
+;; so you may need type hints and coercions on them
 ```
 
 Representing an instance of `YourJavaClass` in a Clojure data structure
@@ -86,6 +95,7 @@ exception defense | none        | none
 
 * Release 0.1.5 in progress
   * Add `set-properties` to populate an existing object JDATA-15.
+  * Add `:clojure.java.data/constructor` metadata support JDATA-16.
 
 * Release 0.1.4 on 2019-10-13
   * Fix Clojure hash map conversion problems JDATA-14 (problems introduced in 0.1.3)

@@ -7,8 +7,9 @@
 ;;  or any other, from this software.
 
 (ns clojure.java.test-data
-  (:require [clojure.java.data :refer [from-java set-properties to-java
-                                       *to-java-object-missing-setter*]]
+  (:require [clojure.java.data :as j
+             :refer [from-java set-properties to-java
+                     *to-java-object-missing-setter*]]
             [clojure.tools.logging :refer [log* info]]
             [clojure.test :refer [deftest is testing]])
   (:import (clojure.java.data.test Person Address State Primitive
@@ -176,6 +177,52 @@
                                             :city "Dallas"
                                             :state "TX"
                                             :zip "75432"}})]
+      (is (= "Bob" (.getName person)))
+      (is (= 30 (.getAge person)))
+      (is (= "123 Main St" (.. person getAddress getLine1)))
+      (is (= "Dallas" (.. person getAddress getCity)))
+      (is (= State/TX (.. person getAddress getState)))
+      (is (= "75432" (.. person getAddress getZip))))))
+
+;; constructor tests
+
+(deftest jdata-16
+  (testing "just constructor arguments"
+    (let [^Address address (to-java Address
+                                    (with-meta {}
+                                      {::j/constructor ["123 Main St"
+                                                        "Dallas"
+                                                        (to-java State "TX")
+                                                        "75432"]}))
+          person (to-java Person
+                          (with-meta {}
+                            {::j/constructor ["Bob" (biginteger 30) address]}))]
+      (is (= "Bob" (.getName person)))
+      (is (= 30 (.getAge person)))
+      (is (= "123 Main St" (.. person getAddress getLine1)))
+      (is (= "Dallas" (.. person getAddress getCity)))
+      (is (= State/TX (.. person getAddress getState)))
+      (is (= "75432" (.. person getAddress getZip)))))
+  (testing "mixed constructor arguments and properties"
+    (let [person (to-java Person
+                          (with-meta {:address {:line1 "123 Main St"
+                                                :city "Dallas"
+                                                :state "TX"
+                                                :zip "75432"}}
+                            {::j/constructor ["Bob" (biginteger 30) nil]}))]
+      (is (= "Bob" (.getName person)))
+      (is (= 30 (.getAge person)))
+      (is (= "123 Main St" (.. person getAddress getLine1)))
+      (is (= "Dallas" (.. person getAddress getCity)))
+      (is (= State/TX (.. person getAddress getState)))
+      (is (= "75432" (.. person getAddress getZip))))
+    (let [person (to-java Person
+                          (with-meta {:address {:line1 "123 Main St"
+                                                :city "Dallas"
+                                                :state "TX"
+                                                :zip "75432"}
+                                      :age 30}
+                            {::j/constructor ["Bob" nil nil]}))]
       (is (= "Bob" (.getName person)))
       (is (= 30 (.getAge person)))
       (is (= "123 Main St" (.. person getAddress getLine1)))
