@@ -15,11 +15,11 @@
 
 (set! *warn-on-reflection* true)
 
-(def
- ^{:dynamic true,
-   :doc "Specify the behavior of missing setters in to-java in the
- default object case, using one of :ignore, :log, :error"}
- *to-java-object-missing-setter* :ignore)
+(def ^:dynamic
+  *to-java-object-missing-setter*
+  "Specify the behavior of missing setters in to-java in the
+  default object case, using one of :ignore, :log, :error"
+  :ignore)
 
 (defmulti to-java (fn [destination-type value] [destination-type (class value)]))
 (defmulti from-java class)
@@ -44,7 +44,6 @@
       (assoc the-map (keyword name) (make-getter-fn method))
       the-map)))
 
-
 ;; setters
 
 (defn- is-setter [^java.lang.reflect.Method method]
@@ -54,8 +53,8 @@
   (get (.getParameterTypes method) 0))
 
 (defn- make-setter-fn [^java.lang.reflect.Method method]
-    (fn [instance value]
-      (.invoke method instance (into-array [(to-java (get-setter-type method) value)]))))
+  (fn [instance value]
+    (.invoke method instance (into-array [(to-java (get-setter-type method) value)]))))
 
 (defn- add-setter-fn [the-map ^java.beans.PropertyDescriptor prop-descriptor]
   (let [name (.getName prop-descriptor)
@@ -67,7 +66,7 @@
 (defn- add-array-methods [^Class acls]
   (let [cls (.getComponentType acls)
         to (fn [_ sequence] (into-array cls (map (partial to-java cls)
-                                                sequence)))
+                                                 sequence)))
         from (fn [obj] (map from-java obj))]
     (.addMethod ^clojure.lang.MultiFn to-java [acls Iterable] to)
     (.addMethod ^clojure.lang.MultiFn from-java acls from)
@@ -77,15 +76,13 @@
 
 (defmethod to-java :default [^Class cls value]
   (if (.isArray cls)
-                                        ; no method for this array type yet
-    ((:to (add-array-methods cls))
-     cls value)
+    ;; no method for this array type yet
+    ((:to (add-array-methods cls)) cls value)
     value))
 
 (defmethod to-java [Enum String] [^Class enum value]
   (.invoke (.getDeclaredMethod enum "valueOf" (into-array [String]))
            nil (into-array [value])))
-
 
 (defn- throw-log-or-ignore-missing-setter [key ^Class clazz]
   (let [message (str "Missing setter for " key " in " (.getCanonicalName clazz))]
@@ -95,6 +92,7 @@
           (logger/info message))))
 
 ;; feature testing macro, based on suggestion from Chas Emerick:
+
 (defmacro ^{:private true} when-available
   [sym & body]
   (try
@@ -140,21 +138,21 @@
   (if (.isInterface clazz)
     (if (instance? clazz props)
       (condp = clazz
-        ;; make a fresh (mutabl) hash map from the Clojure map
-        java.util.Map (java.util.HashMap. ^java.util.Map props)
-        ;; Iterable, Serializable, Runnable, Callable
-        ;; we should probably figure out actual objects to create...
-        props)
+             ;; make a fresh (mutabl) hash map from the Clojure map
+             java.util.Map (java.util.HashMap. ^java.util.Map props)
+             ;; Iterable, Serializable, Runnable, Callable
+             ;; we should probably figure out actual objects to create...
+             props)
       (throw (IllegalArgumentException.
-               (str (.getName clazz) " is an interface "
-                    "and cannot be constructed from "
-                    (str/join ", " (map name (keys props)))))))
+              (str (.getName clazz) " is an interface "
+                   "and cannot be constructed from "
+                   (str/join ", " (map name (keys props)))))))
     (let [instance (try (.newInstance clazz)
                      (catch Throwable t
                        (throw (IllegalArgumentException.
-                                (str (.getName clazz)
-                                     " cannot be constructed")
-                                t))))]
+                               (str (.getName clazz)
+                                    " cannot be constructed")
+                               t))))]
       (set-properties-on instance clazz props))))
 
 (when-available
@@ -179,11 +177,9 @@
   "Convert a Java object to a Clojure map"
   (let [clazz (.getClass instance)]
     (if (.isArray clazz)
-      ((:from (add-array-methods clazz))
-       instance)
+      ((:from (add-array-methods clazz)) instance)
       (let [getter-map (reduce add-getter-fn {} (get-property-descriptors clazz))]
         (into {} (for [[key getter-fn] (seq getter-map)] [key (getter-fn instance)]))))))
-
 
 (doseq [clazz [String Character Byte Short Integer Long Float Double BigInteger BigDecimal]]
   (derive clazz ::do-not-convert))
