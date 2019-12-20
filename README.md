@@ -6,7 +6,7 @@ clojure-contrib
 
 ## Releases and Dependency Information
 
-Latest stable release: 0.1.4
+Latest stable release: 0.1.5
 
 * [All Released Versions](http://search.maven.org/#search%7Cga%7C1%7Corg.clojure%20java.data)
 * [Development Snapshot Versions](https://repository.sonatype.org/index.html#nexus-search;gav~org.clojure~java.data~~~)
@@ -14,7 +14,7 @@ Latest stable release: 0.1.4
 ### Leiningen
 
 ```clojure
-[org.clojure/java.data "0.1.4"]
+[org.clojure/java.data "0.1.5"]
 ```
 
 ### Maven
@@ -23,7 +23,7 @@ Latest stable release: 0.1.4
 <dependency>
     <groupId>org.clojure</groupId>
     <artifactId>java.data</artifactId>
-    <version>0.1.4</version>
+    <version>0.1.5</version>
 </dependency>
 ```
 
@@ -93,7 +93,7 @@ exception defense | none        | none
 
 ## Change Log
 
-* Release 0.1.5 in progress
+* Release 0.1.5 on 2019-12-20
   * Add `set-properties` to populate an existing object JDATA-15.
   * Add `:clojure.java.data/constructor` metadata support JDATA-16.
 
