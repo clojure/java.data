@@ -30,16 +30,22 @@ Latest stable release: 0.1.4
 ## Example Usage
 
 ```clojure
-(use 'clojure.java.data)
+(require '[clojure.java.data :as j])
 
-(to-java YourJavaClass clojure-property-map)
-(from-java javaValue)
+;; construct YourJavaClass instance from Clojure data structure
+;; (usually a Clojure hash map of properties to set on the instance):
+(j/to-java YourJavaClass clojure-property-map)
+;; represent a javaValue instance in a Clojure data structure:
+(j/from-java javaValue)
+;; populate javaValue instance from a Clojure property hash map
+;; (calls a setter for each key/value pair in the hash map):
+(j/set-properties javaValue clojure-property-map)
 ```
 
 Representing an instance of `YourJavaClass` in a Clojure data structure
 
 ```clojure
-(defmethod from-java YourJavaClass [instance]
+(defmethod j/from-java YourJavaClass [instance]
   ; your custom logic for turning this instance into a clojure data structure
 )
 ```
@@ -47,7 +53,7 @@ Representing an instance of `YourJavaClass` in a Clojure data structure
 Constructing an instance of `YourJavaClass` from a Clojure data structure
 
 ```clojure
-(defmethod to-java [YourJavaClass clojure.lang.APersistentMap] [clazz props]
+(defmethod j/to-java [YourJavaClass clojure.lang.APersistentMap] [clazz props]
   ; your custom logic for constructing an instance from a property map
 )
 ```
@@ -77,6 +83,9 @@ exception defense | none        | none
 * [Compatibility Test Matrix](http://build.clojure.org/job/java.data-test-matrix/)
 
 ## Change Log
+
+* Release 0.1.5 in progress
+  * Add `set-properties` to populate an existing object JDATA-15.
 
 * Release 0.1.4 on 2019-10-13
   * Fix Clojure hash map conversion problems JDATA-14 (problems introduced in 0.1.3)

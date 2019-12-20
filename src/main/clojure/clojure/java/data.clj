@@ -1,13 +1,13 @@
-;;  Copyright (c) Cosmin Stejerean. All rights reserved.  The use and
-;;  distribution terms for this software are covered by the Eclipse Public
-;;  License 1.0 (http://opensource.org/licenses/eclipse-1.0.php) which can
-;;  be found in the file epl-v10.html at the root of this distribution.  By
-;;  using this software in any fashion, you are agreeing to be bound by the
-;;  terms of this license.  You must not remove this notice, or any other,
-;;  from this software.
+;;  Copyright (c) Cosmin Stejerean, Sean Corfield. All rights reserved.
+;;  The use and distribution terms for this software are covered by the
+;;  Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;;  which can be found in the file epl-v10.html at the root of this
+;;  distribution.  By using this software in any fashion, you are agreeing to
+;;  be bound by the terms of this license.  You must not remove this notice,
+;;  or any other, from this software.
 
 (ns
-  ^{:author "Cosmin Stejerean",
+  ^{:author "Cosmin Stejerean, Sean Corfield",
     :doc "Support for recursively converting Java beans to Clojure and vice versa."}
   clojure.java.data
   (:require [clojure.string :as str]
@@ -119,6 +119,20 @@
       (throw (IllegalArgumentException. "java.time.Instant requires :nano and :epochSecond")))
     (java.time.Instant/ofEpochSecond (:epochSecond props) (:nano props))))
 
+(defn- set-properties-on
+  "Given an instance, its class, and a hash map of properties,
+  call the appropriate setters and return the populated object.
+
+  Used by to-java and set-properties below."
+  [instance ^Class clazz props]
+  (let [setter-map (reduce add-setter-fn {} (get-property-descriptors clazz))]
+    (doseq [[key value] props]
+      (let [setter (get setter-map (keyword key))]
+        (if (nil? setter)
+          (throw-log-or-ignore-missing-setter key clazz)
+          (apply setter [instance value]))))
+    instance))
+
 (defmethod to-java [Object clojure.lang.APersistentMap] [^Class clazz props]
   "Convert a Clojure map to the specified class using reflection to set the
   properties. If the class is an interface, we can't create an instance of
@@ -140,14 +154,8 @@
                        (throw (IllegalArgumentException.
                                 (str (.getName clazz)
                                      " cannot be constructed")
-                                t))))
-          setter-map (reduce add-setter-fn {} (get-property-descriptors clazz))]
-      (doseq [[key value] props]
-        (let [setter (get setter-map (keyword key))]
-          (if (nil? setter)
-            (throw-log-or-ignore-missing-setter key clazz)
-            (apply setter [instance value]))))
-      instance)))
+                                t))))]
+      (set-properties-on instance clazz props))))
 
 (when-available
  biginteger
@@ -156,6 +164,14 @@
 (when-not-available
  biginteger
  (defmethod to-java [BigInteger Object] [_ value] (bigint value)))
+
+;; set properties on existing objects
+
+(defn set-properties
+  "Given an existing Java object and a Clojure map, use reflection to
+  set the properties."
+  [instance props]
+  (set-properties-on instance (class instance) props))
 
 ;; common from-java definitions
 
