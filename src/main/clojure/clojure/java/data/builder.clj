@@ -148,7 +148,9 @@
                         (find-setters builder (.getMethods builder) opts)
                         builder
                         props)
-              nil))))
+              nil)
+     (throw (IllegalArgumentException.
+             (str "Unable to deduce a builder class for " (.getName clazz)))))))
 
 (comment
   (to-java java.util.Locale {:language "fr" :region "EG"}
