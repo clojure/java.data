@@ -121,7 +121,17 @@
 (defn to-java
   "Given a class and a hash map of properties, figure out the Builder class,
   figure out the setters for the Builder, construct an instance of it and
-  produce an instance of the original class.
+  produce an instance of the original class. A hash map of options may also
+  be provided.
+
+  Alternatively, given a class, a builder instance, a hash map of properties,
+  and a hash map of options, figure out the setters for the builder class,
+  and use the builder instance to produce an instance of the original class.
+
+  Finally, given a class, a builder class, a builder instance (possibly of a
+  different class), a hash map of properties, and a hash map of options,
+  figure out the setters for the builder class, and use the builder instance
+  to produce an instance of the original class.
 
   The following options may be provided:
   * :builder-class -- the class that should be used for the builder process;
@@ -141,19 +151,28 @@
       if it accepts a single argument and returns a builder instance."
   ([clazz props] (to-java clazz props {}))
   ([^Class clazz props opts]
-   (if-let [^Class builder (or (:builder-class opts)
-                               (get-builder-class clazz))]
-     (.invoke (get-builder clazz (.getMethods builder) opts)
-              (build-on (j/to-java builder (get opts :builder-props {}))
-                        (find-setters builder (.getMethods builder) opts)
-                        builder
-                        props)
-              nil)
+   (if-let [builder (or (:builder-class opts) (get-builder-class clazz))]
+     (to-java clazz builder (j/to-java builder (get opts :builder-props {})) props opts)
      (throw (IllegalArgumentException.
-             (str "Unable to deduce a builder class for " (.getName clazz)))))))
+             (str "Unable to deduce a builder class for " (.getName clazz))))))
+  ([clazz instance props opts]
+   (let [builder (or (:builder-class opts) (class instance))]
+     (to-java clazz builder instance props opts)))
+  ([^Class clazz ^Class builder instance props opts]
+   (.invoke (get-builder clazz (.getMethods builder) opts)
+            (build-on instance
+                      (find-setters builder (.getMethods builder) opts)
+                      builder
+                      props)
+            nil)))
 
 (comment
   (to-java java.util.Locale {:language "fr" :region "EG"}
+           ;; these options are all defaults
+           {:builder-class java.util.Locale$Builder
+            :builder-props {}
+            :build-fn "build"})
+  (to-java java.util.Locale (java.util.Locale$Builder.) {:language "fr" :region "EG"}
            ;; these options are all defaults
            {:builder-class java.util.Locale$Builder
             :builder-props {}
