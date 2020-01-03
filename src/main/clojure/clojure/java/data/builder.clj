@@ -53,10 +53,14 @@
                 methods)]
     (reduce (fn [setter-map ^java.lang.reflect.Method m]
               (let [prop (keyword
-                          (if (re-find #"^set[A-Z]" (.getName m))
-                            (let [^String n (subs (.getName m) 3)]
-                              (str (Character/toLowerCase (.charAt n 0)) (subs n 1)))
-                            (.getName m)))]
+                          (cond (re-find #"^set[A-Z]" (.getName m))
+                                (let [^String n (subs (.getName m) 3)]
+                                  (str (Character/toLowerCase (.charAt n 0)) (subs n 1)))
+                                (re-find #"^with[A-Z]" (.getName m))
+                                (let [^String n (subs (.getName m) 4)]
+                                  (str (Character/toLowerCase (.charAt n 0)) (subs n 1)))
+                                :else
+                                (.getName m)))]
                 (if (contains? setter-map prop)
                   (throw (IllegalArgumentException.
                           (str "Duplicate setter found for " prop
