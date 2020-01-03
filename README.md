@@ -69,7 +69,7 @@ Constructing an instance of `YourJavaClass` from a Clojure data structure
 
 ### Usage with Builder Classes
 
-As of 0.2.0, `clojure.java.data` adds a new namespace and a new `to-java`
+As of 0.2.0, `java.data` adds a new namespace and a new `to-java`
 function that supports the Builder Pattern. Instead of just creating an instance
 of the specified class and then setting properties on it, this variant works
 with an associated "builder" class (or instance), setting properties on it,
