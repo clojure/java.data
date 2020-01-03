@@ -6,7 +6,7 @@ clojure-contrib
 
 ## Releases and Dependency Information
 
-Latest stable release: 0.1.5
+Latest stable release: 0.2.0
 
 * [All Released Versions](http://search.maven.org/#search%7Cga%7C1%7Corg.clojure%20java.data)
 * [Development Snapshot Versions](https://repository.sonatype.org/index.html#nexus-search;gav~org.clojure~java.data~~~)
@@ -14,7 +14,7 @@ Latest stable release: 0.1.5
 ### Leiningen
 
 ```clojure
-[org.clojure/java.data "0.1.5"]
+[org.clojure/java.data "0.2.0"]
 ```
 
 ### Maven
@@ -23,7 +23,7 @@ Latest stable release: 0.1.5
 <dependency>
     <groupId>org.clojure</groupId>
     <artifactId>java.data</artifactId>
-    <version>0.1.5</version>
+    <version>0.2.0</version>
 </dependency>
 ```
 
@@ -67,6 +67,55 @@ Constructing an instance of `YourJavaClass` from a Clojure data structure
 )
 ```
 
+### Usage with Builder Classes
+
+As of 0.2.0, `clojure.java.data` adds a new namespace and a new `to-java`
+function that supports the Builder Pattern. Instead of just creating an instance
+of the specified class and then setting properties on it, this variant works
+with an associated "builder" class (or instance), setting properties on it,
+and then producing an instance of the specified class from it.
+
+In Java, that typically looks like:
+
+```java
+MyClass foo = new MyClass.Builder()
+                .bar( 42 )
+                .quux( "stuff" )
+                .build();
+```
+
+That becomes:
+
+```clojure
+(require '[clojure.java.data.builder :as builder])
+
+(def foo (builder/to-java MyClass {:bar 42 :quux "stuff"}))
+```
+
+By default, this assumes `MyClass` has a nested class called `Builder`, and the
+property methods could be `.bar`, `.setBar`, or `.withBar`, and then a `.build`
+method that produces the `MyClass` object.
+
+You can also specify an options hash map containing any of the following:
+
+* `:builder-class` -- the class that should be used for the builder process; by default it will assume an inner class of `clazz` called `Builder`,
+* `:builder-props` -- properties used to construct and initialize an instance of the builder class; defaults to an empty hash map; may have `:clojure.java.data/constructor` as metadata to provide constructor arguments for the builder instance,
+* `:build-fn` -- the name of the method in the `Builder` class to use to complete the builder process and return the desired class; by default it will try to deduce it, preferring `build` if we find multiple candidates,
+* `:ignore-setters?` -- a flag to indicate that methods on the builder class that begin with `set` should be ignored, which may be necessary to avoid ambiguous methods that look like builder properties; by default `setFooBar` and `withQuuxIt` will be treated as builder properties `fooBar` and `quuxIt` if they accept a single argument and return a builder instance.
+
+Additional arities allow you to specify a builder instance, for cases where the
+builder is not simply constructed from a (nested) class, and both a builder class
+and a builder instance for more complex cases:
+
+```clojure
+;; requires the options hash map, even if it is empty:
+(builder/to-java MyClass (MyClass/builder) {:bar 42 :quux "stuff"} {})
+
+;; for cases where the type of the builder instance differs from the actual
+;; builder class that should be used for property method return types:
+(builder/to-java MyClass MyClassBuilder (MyClass/builder) {:bar 42 :quux "stuff"} {})
+```
+
 ## Feature comparison to `clojure.core/bean`
 
 Clojure core provides a `bean` function which has some overlap with java.data. Below is a more detailed comparison:
@@ -92,6 +141,9 @@ exception defense | none        | none
 * [Compatibility Test Matrix](http://build.clojure.org/job/java.data-test-matrix/)
 
 ## Change Log
+
+* Release 0.2.0 on 2020-01-02
+  * Add `clojure.java.data.builder/to-java` to construct Java objects from builders using hash maps of properties JDATA-18.
 
 * Release 0.1.5 on 2019-12-20
   * Add `set-properties` to populate an existing object JDATA-15.
