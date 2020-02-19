@@ -174,6 +174,9 @@
             :build-fn "build"})
   (to-java java.util.Locale (java.util.Locale$Builder.) {:language "fr" :region "EG"}
            ;; these options are all defaults
+           {#_#_:builder-class java.util.Locale$Builder})
+  (to-java java.util.Locale (java.util.Locale$Builder.) {:language "fr" :region "EG"}
+           ;; these options are all defaults
            {:builder-class java.util.Locale$Builder
             :builder-props {}
             :build-fn "build"}))
