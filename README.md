@@ -8,7 +8,7 @@ clojure-contrib
 
 This project follows the version scheme MAJOR.MINOR.COMMITS where MAJOR and MINOR provide some relative indication of the size of the change, but do not follow semantic versioning. In general, all changes endeavor to be non-breaking (by moving to new names rather than by breaking existing names). COMMITS is an ever-increasing counter of commits since the beginning of this repository.
 
-Latest stable release: 1.0.N
+Latest stable release: 1.0.64
 
 * [All Released Versions](http://search.maven.org/#search%7Cga%7C1%7Corg.clojure%20java.data)
 * [Development Snapshot Versions](https://repository.sonatype.org/index.html#nexus-search;gav~org.clojure~java.data~~~)
@@ -16,7 +16,7 @@ Latest stable release: 1.0.N
 ### Leiningen
 
 ```clojure
-[org.clojure/java.data "1.0.N"]
+[org.clojure/java.data "1.0.64"]
 ```
 
 ### Maven
@@ -25,7 +25,7 @@ Latest stable release: 1.0.N
 <dependency>
     <groupId>org.clojure</groupId>
     <artifactId>java.data</artifactId>
-    <version>1.0.N</version>
+    <version>1.0.64</version>
 </dependency>
 ```
 
@@ -144,7 +144,7 @@ exception defense | none        | none
 
 ## Change Log
 
-* Release 1.0.N on 2020-02-18
+* Release 1.0.64 on 2020-02-18
   * Switch to 1.0.x versioning.
   * Bump `org.clojure/tools.logging` to `0.6.0`.
   * Add basic tests for the builder [JDATA-20](https://clojure.atlassian.net/browse/JDATA-20).
