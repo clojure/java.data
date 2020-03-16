@@ -1,7 +1,7 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>clojure.java.data - Work with Java Beans 0.1.2 API documentation</title>
+    <title>clojure.java.data - java.data 1.0.65-SNAPSHOT API documentation</title>
     <link rel="icon" href="static/favicon.png" />
     <link rel="shortcut icon" href="static/favicon.png" />
     <link rel="stylesheet" href="static/clojure.css" type="text/css" media="all" />
@@ -25,14 +25,14 @@ namespace.
       <div id="leftcolumn"><div style="text-align: center;"></div>
 <div class="menu">
   <div class="WikiCustomNav WikiElement wiki">
-    <span class="toc-header"><span id="project-name">Work with Java Beans</span> <span id="version">0.1.2</span> API</span><br />
+    <span class="toc-header"><span id="project-name">java.data</span> <span id="version">1.0.65-SNAPSHOT</span> API</span><br />
     <ul>
       <li><a href="index.html" class="wiki_link">Overview</a></li>
       <li><a href="api-index.html" class="wiki_link">API Index</a></li>
     </ul>
     
     
-    <a class="wiki_link" href="http://clojure.org">Clojure Home</a>
+    <a class="wiki_link" href="https://clojure.org">Clojure Home</a>
   </div>
 </div>
 </div>
@@ -56,21 +56,30 @@ namespace.
     <div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.java.data/*to-java-object-missing-setter*" class="toc-entry-anchor">*to-java-object-missing-setter*</a>
       
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.data/set-properties" class="toc-entry-anchor">set-properties</a>
+      
     </div>
   </div><div class="toc-section" style="margin-left: 1em;">
     <a style="margin-top: 3px;" href="#"></a>
     
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#clojure.java.data.builder">clojure.java.data.builder</a>
+    <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.data.builder/to-java" class="toc-entry-anchor">to-java</a>
+      
+    </div>
   </div>
 </div>
 </div>
                 <div id="content-tag"><h1 id="overview">API for <span id="clojure.java.data">clojure.java.data</span>
-  - <span id="header-project">Work with Java Beans</span> <span id="header-version">0.1.2</span><span id="header-status-block"> (<span id="header-status">in development</span>)</span>
+  - <span id="header-project">java.data</span> <span id="header-version">1.0.65-SNAPSHOT</span><span id="header-status-block"> (<span id="header-status">in development</span>)</span>
   </h1>
-<span id="author-line">by <span id="author-name">Cosmin Stejerean</span><br /></span>
+<span id="author-line">by <span id="author-name">Cosmin Stejerean, Sean Corfield</span><br /></span>
 <br />Full namespace name: <span id="long-name">clojure.java.data</span>
 <p></p>
 <h2>Overview</h2>
-<div id="home-page">Project home page is <a href="http://github.com/clojure/java.data/">http://github.com/clojure/java.data/</a></div>
+<div id="home-page">Project home page is <a href="https://github.com/clojure/java.data/">https://github.com/clojure/java.data/</a></div>
 <pre id="namespace-docstr">Support for recursively converting Java beans to Clojure and vice versa.</pre>
 
 
@@ -92,7 +101,79 @@ default object case, using one of :ignore, :log, :error</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/java.data/blob/92937d1eff36c847581ec391deebe5ba6b029fc5/src/main/clojure/clojure/java/data.clj#L16">Source</a>
+    <a id="var-source" href="https://github.com/clojure/java.data/blob/259b7ed9a25de5c03856633296d19deb18ea3e28/src/main/clojure/clojure/java/data.clj#L18">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.data/set-properties">set-properties</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (set-properties instance props)
+</pre>
+    <pre id="var-docstr">Given an existing Java object and a Clojure map, use reflection to
+set the properties.</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/java.data/blob/259b7ed9a25de5c03856633296d19deb18ea3e28/src/main/clojure/clojure/java/data.clj#L211">Source</a>
+  </div>
+</div>
+
+<br />
+<h2 id="clojure.java.data.builder">clojure.java.data.builder</h2>
+<pre id="namespace-docstr">A variant of clojure.java.data/to-java that uses a Builder class
+to build the requested class from a hash map of properties.</pre>
+
+
+<br />
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.data.builder/to-java">to-java</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (to-java clazz props)
+       (to-java clazz props opts)
+       (to-java clazz instance props opts)
+       (to-java clazz builder instance props opts)
+</pre>
+    <pre id="var-docstr">Given a class and a hash map of properties, figure out the Builder class,
+figure out the setters for the Builder, construct an instance of it and
+produce an instance of the original class. A hash map of options may also
+be provided.
+
+Alternatively, given a class, a builder instance, a hash map of properties,
+and a hash map of options, figure out the setters for the builder class,
+and use the builder instance to produce an instance of the original class.
+
+Finally, given a class, a builder class, a builder instance (possibly of a
+different class), a hash map of properties, and a hash map of options,
+figure out the setters for the builder class, and use the builder instance
+to produce an instance of the original class.
+
+The following options may be provided:
+* :builder-class -- the class that should be used for the builder process;
+    by default we'll assume an inner class of clazz called 'Builder',
+* :builder-props -- properties used to construct and initialize an instance
+    of the builder class; defaults to an empty hash map; may have
+    :clojure.java.data/constructor as metadata to provide constructor
+    arguments for the builder instance,
+* :build-fn -- the name of the method in the Builder class to use to
+    complete the builder process and return the desired class;
+    by default we'll try to deduce it, preferring 'build' if we find
+    multiple candidates,
+* :ignore-setters? -- a flag to indicate that methods on the builder
+    class that begin with 'set' should be ignored, which may be
+    necessary to avoid ambiguous methods that look like builder properties;
+    by default 'setFooBar` will be treated as a builder property 'fooBar'
+    if it accepts a single argument and returns a builder instance.</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/java.data/blob/995c4b906c48b2ae96f4af660956cf723dccf4f9/src/main/clojure/clojure/java/data/builder.clj#L121">Source</a>
   </div>
 </div>
 
@@ -103,7 +184,7 @@ default object case, using one of :ignore, :log, :error</pre>
           </div>
 	</div>
 	<div id="foot">
-	  <div id="copyright" style="text-align: center;">Copyright 2007-2017 by Rich Hickey and the various contributors</div>
+	  <div id="copyright" style="text-align: center;">Copyright 2007-2019 by Rich Hickey and the various contributors</div>
 	</div>
       </div>
       <div id="DesignedBy">Logo &amp; site design by <a href="http://www.tomhickey.com" title="Visit Tom Hickey's website.">Tom Hickey</a>.<br />
