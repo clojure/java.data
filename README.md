@@ -38,6 +38,18 @@ Latest stable release: 1.0.64
 ;; (usually a Clojure hash map of properties to set on the instance):
 (j/to-java YourJavaClass clojure-property-map)
 
+;; the 0-arity constructor is called to construct the instance
+;; and then the properties are added by calling setters
+
+;; note that keys in the property map must follow the :camelCase
+;; naming of the Java fields to which they correspond, so that
+;; the appropriate setter methods can be invoked, e.g.,
+(j/to-java SomeJavaClass {:stuff 42 :moreStuff "13"})
+;; this is equivalent to:
+(let [obj (SomeJavaClass.)]
+  (.setStuff obj 42)
+  (.setMoreStuff obj "13"))
+
 ;; represent a javaValue instance in a Clojure data structure:
 (j/from-java javaValue)
 
@@ -81,7 +93,7 @@ In Java, that typically looks like:
 
 ```java
 MyClass foo = new MyClass.Builder()
-                .bar( 42 )
+                .fooBar( 42 )
                 .quux( "stuff" )
                 .build();
 ```
@@ -91,12 +103,13 @@ That becomes:
 ```clojure
 (require '[clojure.java.data.builder :as builder])
 
-(def foo (builder/to-java MyClass {:bar 42 :quux "stuff"}))
+(def foo (builder/to-java MyClass {:fooBar 42 :quux "stuff"}))
 ```
 
 By default, this assumes `MyClass` has a nested class called `Builder`, and the
-property methods could be `.bar`, `.setBar`, or `.withBar`, and then a `.build`
-method that produces the `MyClass` object.
+property methods could be `.fooBar`, `.setFooBar`, or `.withFooBar` (and
+`.quux`, `.setQuux`, or `.withQuux`), and then a `.build` method
+that produces the `MyClass` object.
 
 You can also specify an options hash map containing any of the following:
 
@@ -143,6 +156,10 @@ exception defense | none        | none
 * [Compatibility Test Matrix](http://build.clojure.org/job/java.data-test-matrix/)
 
 ## Change Log
+
+* Release 1.0.next in progress
+  * Bump `org.clojure/tools.logging` to `1.0.0`.
+  * Improve documentation around property naming and how it corresponds to setter function names.
 
 * Release 1.0.64 on 2020-02-18
   * Switch to 1.0.x versioning.
