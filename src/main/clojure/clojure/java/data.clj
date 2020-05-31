@@ -44,6 +44,13 @@
   conversion:
   * :add-class -- if true, add :class with the actual class of the object
           being converted -- this mimics clojure.core/bean.
+  * :exceptions -- controls how getter exceptions should be handled:
+          * :group -- return an :exceptions hash map in the object that
+                contains all the properties that failed, with their exceptions,
+          * :omit -- ignore exceptions and omit the properties that caused them,
+          * :qualify -- return the exception as :<property>/exception and
+                omit the property itself,
+          * :return -- simply return the exception as the value of the property.
   * :omit -- a set of properties (keywords) to omit from the conversion
           so that unsafe methods are not called."
   (fn [obj _] (class obj)))
@@ -263,11 +270,28 @@
   (let [clazz (.getClass instance)]
     (if (.isArray clazz)
       ((:from-shallow (add-array-methods clazz)) instance opts)
-      (let [getter-map (reduce add-shallow-getter-fn {} (get-property-descriptors clazz))]
-        (into (if (:add-class opts) {:class (class instance)} {})
-              (for [[key getter-fn] (seq getter-map)
-                    :when (not (contains? (:omit opts) key))]
-                [key (getter-fn instance)]))))))
+      (let [getter-map (reduce add-shallow-getter-fn {} (get-property-descriptors clazz))
+            exs        (atom [])
+            pairs      (for [[key getter-fn] (seq getter-map)
+                             :when (not (contains? (:omit opts) key))
+                             :let [[k v]
+                                   (if-let [exh (:exceptions opts)]
+                                     (try
+                                       [key (getter-fn instance)]
+                                       (catch Throwable t
+                                         (case exh
+                                           :group   (swap! exs conj [key t])
+                                           :omit    nil
+                                           :qualify [(keyword (name key)
+                                                              "exception") t]
+                                           :return  [key t])))
+                                     [key (getter-fn instance)])]
+                             :when k]
+                         [k v])]
+        (cond-> {}
+          (:add-class opts) (assoc :class (class instance))
+          (seq @exs)        (assoc :exceptions (into {} @exs))
+          (seq pairs)       (into pairs))))))
 
 (doseq [clazz [String Character Byte Short Integer Long Float Double
                java.math.BigInteger java.math.BigDecimal]]
