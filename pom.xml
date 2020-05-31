@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>java.data</artifactId>
-    <version>1.0.65-SNAPSHOT</version>
+    <version>1.0.73</version>
     <name>java.data</name>
 
     <url>https://github.com/clojure/java.data/</url>
@@ -27,7 +27,7 @@
       <connection>scm:git:git@github.com:clojure/java.data.git</connection>
       <developerConnection>scm:git:git@github.com:clojure/java.data.git</developerConnection>
       <url>git@github.com:clojure/java.data.git</url>
-      <tag>HEAD</tag>
+      <tag>java.data-1.0.73</tag>
   </scm>
 
     <dependencies>
