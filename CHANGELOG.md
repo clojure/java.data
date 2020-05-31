@@ -1,6 +1,7 @@
 ## Change Log
 
 * Release 1.0.next in progress
+  * Add `from-java-shallow` to provide functionality similar to `clojure.core/bean` (a shallow conversion) but with options to control behavior (so "dangerous" methods that appear as getters can be omitted).
   * Bump `org.clojure/tools.logging` to `1.1.0`.
   * Move change log to a separate file.
   * Improve documentation around property naming and how it corresponds to setter function names.
