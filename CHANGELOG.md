@@ -1,6 +1,6 @@
 ## Change Log
 
-* Release 1.0.next in progress
+* Release 1.0.78 on 2020-05-31
   * Make exception handling in shallow conversions configurable: an `:exceptions` option may be `:group`, `:omit`, `:quaify`, or `:return`.
   * Fix bug in shallow array handling.
 
