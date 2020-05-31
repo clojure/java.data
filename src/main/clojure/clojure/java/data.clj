@@ -106,7 +106,7 @@
         to (fn [_ sequence] (into-array cls (map (partial to-java cls)
                                                  sequence)))
         from (fn [obj] (map from-java obj))
-        from-shallow (fn [obj opts] (map from-java-shallow obj opts))]
+        from-shallow (fn [obj opts] (map #(from-java-shallow % opts) obj))]
     (.addMethod ^clojure.lang.MultiFn to-java [acls Iterable] to)
     (.addMethod ^clojure.lang.MultiFn from-java acls from)
     (.addMethod ^clojure.lang.MultiFn from-java-shallow acls from-shallow)
@@ -264,7 +264,7 @@
     (if (.isArray clazz)
       ((:from-shallow (add-array-methods clazz)) instance opts)
       (let [getter-map (reduce add-shallow-getter-fn {} (get-property-descriptors clazz))]
-        (into (if (:add-class opts) {:class (class instance)} {}) 
+        (into (if (:add-class opts) {:class (class instance)} {})
               (for [[key getter-fn] (seq getter-map)
                     :when (not (contains? (:omit opts) key))]
                 [key (getter-fn instance)]))))))
