@@ -164,7 +164,7 @@
                  :nestedIntArray [[1 2] [3] [4 5 6] []]
                  :stringArray ["Argument" "Vector"]}]
       (reduce-kv (fn [_ k v]
-                   (if (str/ends-with? (name k) "Array")
+                   (if (.endsWith ^String (name k) "Array")
                      (if (= k :nestedIntArray)
                        (is (= (get datum k) (map #(into [] %) v)))
                        (is (= (get datum k) (seq v))))
