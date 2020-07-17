@@ -8,8 +8,10 @@
 
 (ns clojure.java.test-data
   (:require [clojure.java.data :as j
-             :refer [from-java set-properties to-java
+             :refer [from-java from-java-deep from-java-shallow
+                     set-properties to-java
                      *to-java-object-missing-setter*]]
+            [clojure.string :as str]
             [clojure.tools.logging :refer [log* info]]
             [clojure.test :refer [deftest is testing]])
   (:import (clojure.java.data.test Person Address State Primitive
@@ -78,65 +80,183 @@
  (defn- to-BigInteger [v] (bigint v)))
 
 (deftest java-to-clojure
-  (let [address (new Address "123 Main St" "Dallas" State/TX "75432")
-        person (from-java (Person. "Bob" (to-BigInteger 30) address))]
-    (is (= "Bob" (:name person)))
-    (is (= 30 (:age person)))
-    (is (= "123 Main St" (:line1 (:address person))))
-    (is (= "TX" (:state (:address person))))))
+  (testing "regular"
+    (let [address (new Address "123 Main St" "Dallas" State/TX "75432")
+          person (from-java (Person. "Bob" (to-BigInteger 30) address))]
+      (is (= "Bob" (:name person)))
+      (is (= 30 (:age person)))
+      (is (= "123 Main St" (:line1 (:address person))))
+      (is (= "TX" (:state (:address person))))))
+  (testing "deep"
+    (let [address (new Address "123 Main St" "Dallas" State/TX "75432")
+          person (from-java-deep (Person. "Bob" (to-BigInteger 30) address) {})]
+      (is (= "Bob" (:name person)))
+      (is (= 30 (:age person)))
+      (is (= "123 Main St" (:line1 (:address person))))
+      (is (= "TX" (:state (:address person))))))
+  (testing "shallow"
+    (let [address (new Address "123 Main St" "Dallas" State/TX "75432")
+          person (from-java-shallow (Person. "Bob" (to-BigInteger 30) address) {})]
+      (is (= "Bob" (:name person)))
+      (is (= 30 (:age person)))
+      (is (instance? Address (:address person))))))
 
 (deftest primitives
-  (let [datum {:boolMember true
-               :boolArray [true false]
-               :charMember \H
-               :charArray (map identity "Hello World")
-               :byteMember 127
-               :byteArray [1 2 3]
-               :shortMember 15000
-               :shortArray [13000 14000 15000]
-               :intMember 18000
-               :intArray [1 2 3]
-               :longMember 60000000
-               :longArray [1 2 3]
-               :floatMember 1.5
-               :floatArray [1.5 2.5 3.5]
-               :doubleMember 1.5
-               :doubleArray [1.5 2.0 2.5]
-               :nestedIntArray [[1 2] [3] [4 5 6] []]
-               :stringArray ["Argument" "Vector"]}]
-    (is (= datum
-           (from-java (to-java Primitive datum))))))
+  (testing "regular"
+    (let [datum {:boolMember true
+                 :boolArray [true false]
+                 :charMember \H
+                 :charArray (map identity "Hello World")
+                 :byteMember 127
+                 :byteArray [1 2 3]
+                 :shortMember 15000
+                 :shortArray [13000 14000 15000]
+                 :intMember 18000
+                 :intArray [1 2 3]
+                 :longMember 60000000
+                 :longArray [1 2 3]
+                 :floatMember 1.5
+                 :floatArray [1.5 2.5 3.5]
+                 :doubleMember 1.5
+                 :doubleArray [1.5 2.0 2.5]
+                 :nestedIntArray [[1 2] [3] [4 5 6] []]
+                 :stringArray ["Argument" "Vector"]}]
+      (is (= datum
+             (from-java (to-java Primitive datum))))))
+  (testing "deep"
+    (let [datum {:boolMember true
+                 :boolArray [true false]
+                 :charMember \H
+                 :charArray (map identity "Hello World")
+                 :byteMember 127
+                 :byteArray [1 2 3]
+                 :shortMember 15000
+                 :shortArray [13000 14000 15000]
+                 :intMember 18000
+                 :intArray [1 2 3]
+                 :longMember 60000000
+                 :longArray [1 2 3]
+                 :floatMember 1.5
+                 :floatArray [1.5 2.5 3.5]
+                 :doubleMember 1.5
+                 :doubleArray [1.5 2.0 2.5]
+                 :nestedIntArray [[1 2] [3] [4 5 6] []]
+                 :stringArray ["Argument" "Vector"]}]
+      (is (= datum
+             (from-java-deep (to-java Primitive datum) {})))))
+  (testing "shallow"
+    (let [datum {:boolMember true
+                 :boolArray [true false]
+                 :charMember \H
+                 :charArray (map identity "Hello World")
+                 :byteMember 127
+                 :byteArray [1 2 3]
+                 :shortMember 15000
+                 :shortArray [13000 14000 15000]
+                 :intMember 18000
+                 :intArray [1 2 3]
+                 :longMember 60000000
+                 :longArray [1 2 3]
+                 :floatMember 1.5
+                 :floatArray [1.5 2.5 3.5]
+                 :doubleMember 1.5
+                 :doubleArray [1.5 2.0 2.5]
+                 :nestedIntArray [[1 2] [3] [4 5 6] []]
+                 :stringArray ["Argument" "Vector"]}]
+      (reduce-kv (fn [_ k v]
+                   (if (str/ends-with? (name k) "Array")
+                     (if (= k :nestedIntArray)
+                       (is (= (get datum k) (map #(into [] %) v)))
+                       (is (= (get datum k) (seq v))))
+                     (is (= (get datum k) v))))
+                 nil
+                 (from-java-shallow (to-java Primitive datum) {})))))
+
+(deftest java-map
+  (let [datum {"a" "one" "b" 2 "c" (java.net.URI. "")}]
+    (testing "regular" ; is actually shallow on hash maps
+      (is (= datum (from-java (to-java java.util.Map datum)))))
+    (testing "deep"
+      (is (= (update datum "c" from-java)
+             (from-java-deep (to-java java.util.Map datum) {}))))
+    (testing "shallow"
+      (is (= datum (from-java-shallow (to-java java.util.Map datum) {}))))))
 
 (deftest jdata-6
-  (let [bean-instance (TestBean6.)
-        _ (. bean-instance setFoo {"bar" "baz"})
-        bean-instance-as-map (from-java bean-instance)
-        new-bean-instance (to-java TestBean6 bean-instance-as-map)]
-    (is (= {"bar" "baz"} (:foo bean-instance-as-map)))
-    (is (= {"bar" "baz"} (.getFoo new-bean-instance)))))
+  (testing "regular"
+    (let [bean-instance (TestBean6.)
+          _ (. bean-instance setFoo {"bar" "baz"})
+          bean-instance-as-map (from-java bean-instance)
+          new-bean-instance (to-java TestBean6 bean-instance-as-map)]
+      (is (= {"bar" "baz"} (:foo bean-instance-as-map)))
+      (is (= {"bar" "baz"} (.getFoo new-bean-instance)))))
+  (testing "deep"
+    (let [bean-instance (TestBean6.)
+          _ (. bean-instance setFoo {"bar" "baz"})
+          bean-instance-as-map (from-java-deep bean-instance {})
+          new-bean-instance (to-java TestBean6 bean-instance-as-map)]
+      (is (= {"bar" "baz"} (:foo bean-instance-as-map)))
+      (is (= {"bar" "baz"} (.getFoo new-bean-instance)))))
+  (testing "shallow"
+    (let [bean-instance (TestBean6.)
+          _ (. bean-instance setFoo {"bar" "baz"})
+          bean-instance-as-map (from-java-shallow bean-instance {})
+          new-bean-instance (to-java TestBean6 bean-instance-as-map)]
+      (is (= {"bar" "baz"} (:foo bean-instance-as-map)))
+      (is (= {"bar" "baz"} (.getFoo new-bean-instance))))))
 
 (deftest jdata-8-11-date
-  (let [d (java.util.Date.)]
-    (is (= d (to-java java.util.Date (from-java d))))))
+  (testing "regular"
+    (let [d (java.util.Date.)]
+      (is (= d (to-java java.util.Date (from-java d))))))
+  (testing "deep"
+    (let [d (java.util.Date.)]
+      (is (= d (to-java java.util.Date (from-java-deep d {}))))))
+  (testing "shallow"
+    (let [d (java.util.Date.)]
+      (is (= d (to-java java.util.Date (from-java-shallow d {})))))))
 
 (when-available
   java.time.Instant
   (deftest jdata-8-11-instant
-    (let [t (java.time.Instant/now)]
-      (is (= t (to-java java.time.Instant (from-java t)))))))
+    (testing "regular"
+      (let [t (java.time.Instant/now)]
+        (is (= t (to-java java.time.Instant (from-java t))))))
+    (testing "deep"
+      (let [t (java.time.Instant/now)]
+        (is (= t (to-java java.time.Instant (from-java-deep t {}))))))
+    (testing "shallow"
+      (let [t (java.time.Instant/now)]
+        (is (= t (to-java java.time.Instant (from-java-shallow t {}))))))))
 
 (deftest jdata-9
   (let [bean-instance (TestBean9.)
         _ (.setAString bean-instance "something")
         _ (.setABool bean-instance true)
         _ (.setABoolean bean-instance false)]
-    (is (= {:AString "something" :ABool true}
-           ;; :ABoolean missing because 'is' Boolean is not a getter
-           (from-java bean-instance)))))
+    (testing "regular"
+      (is (= {:AString "something" :ABool true}
+             ;; :ABoolean missing because 'is' Boolean is not a getter
+             (from-java bean-instance))))
+    (testing "deep"
+      (is (= {:AString "something" :ABool true}
+             ;; :ABoolean missing because 'is' Boolean is not a getter
+             (from-java-deep bean-instance {}))))
+    (testing "shallow"
+      (is (= {:AString "something" :ABool true}
+             ;; :ABoolean missing because 'is' Boolean is not a getter
+             (from-java-shallow bean-instance {}))))))
 
 (deftest jdata-10
-  (is (if (:absolute (from-java (java.net.URI. ""))) false true))
-  (is (if (:opaque (from-java (java.net.URI. ""))) false true)))
+  (testing "regular"
+    (is (if (:absolute (from-java (java.net.URI. ""))) false true))
+    (is (if (:opaque (from-java (java.net.URI. ""))) false true)))
+  (testing "deep"
+    (is (if (:absolute (from-java-deep (java.net.URI. "") {})) false true))
+    (is (if (:opaque (from-java-deep (java.net.URI. "") {})) false true)))
+  (testing "shallow"
+    (is (if (:absolute (from-java-shallow (java.net.URI. "") {})) false true))
+    (is (if (:opaque (from-java-shallow (java.net.URI. "") {})) false true))))
 
 (deftest jdata-12
   (let [eek1 (java.sql.SQLException. "SQL 1")
@@ -144,11 +264,22 @@
         eek3 (java.sql.SQLException. "SQL 3")]
     (.setNextException eek1 eek2)
     (.setNextException eek2 eek3)
-    (let [ex (from-java eek1)]
-      (is (= "SQL 1" (get-in ex [:message])))
-      (is (= "SQL 2" (get-in ex [:nextException :message])))
-      (is (= "SQL 3" (get-in ex [:nextException :nextException :message])))
-      (is (nil? (get-in ex [:nextException :nextException :nextException]))))))
+    (testing "regular"
+      (let [ex (from-java eek1)]
+        (is (= "SQL 1" (get-in ex [:message])))
+        (is (= "SQL 2" (get-in ex [:nextException :message])))
+        (is (= "SQL 3" (get-in ex [:nextException :nextException :message])))
+        (is (nil? (get-in ex [:nextException :nextException :nextException])))))
+    (testing "deep"
+      (let [ex (from-java-deep eek1 {})]
+        (is (= "SQL 1" (get-in ex [:message])))
+        (is (= "SQL 2" (get-in ex [:nextException :message])))
+        (is (= "SQL 3" (get-in ex [:nextException :nextException :message])))
+        (is (nil? (get-in ex [:nextException :nextException :nextException])))))
+    (testing "shallow"
+      (let [ex (from-java-shallow eek1 {})]
+        (is (= "SQL 1" (get-in ex [:message])))
+        (is (instance? java.sql.SQLException (get ex :nextException)))))))
 
 ;; set-properties tests
 
