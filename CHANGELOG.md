@@ -1,5 +1,9 @@
 ## Change Log
 
+* Release 1.0.next in progress
+  * Add `from-java-deep` to guarantee deep conversion with same options as `from-java-shallow` [JDATA-21](https://clojure.atlassian.net/browse/JDATA-21).
+  * Fixes bug in `from-java-shallow` for getters returning `Boolean` (the value was not canonicalized so `false` could be truthy).
+
 * Release 1.0.78 on 2020-05-31
   * Make exception handling in shallow conversions configurable: an `:exceptions` option may be `:group`, `:omit`, `:quaify`, or `:return`.
   * Fix bug in shallow array handling.
