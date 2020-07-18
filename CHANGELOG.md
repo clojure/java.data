@@ -1,6 +1,6 @@
 ## Change Log
 
-* Release 1.0.next in progress
+* Release 1.0.86 on 2020-07-17
   * Add `from-java-deep` to guarantee deep conversion with same options as `from-java-shallow` [JDATA-21](https://clojure.atlassian.net/browse/JDATA-21).
   * Fixes bug in `from-java-shallow` for getters returning `Boolean` (the value was not canonicalized so `false` could be truthy).
 
