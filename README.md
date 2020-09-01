@@ -13,6 +13,12 @@ Latest stable release: 1.0.86
 * [All Released Versions](http://search.maven.org/#search%7Cga%7C1%7Corg.clojure%20java.data)
 * [Development Snapshot Versions](https://repository.sonatype.org/index.html#nexus-search;gav~org.clojure~java.data~~~)
 
+### [CLI/`deps.edn`](https://clojure.org/reference/deps_and_cli) dependency information:
+
+```clojure
+org.clojure/java.data {:mvn/version "1.0.86"}
+```
+
 ### Leiningen
 
 ```clojure
