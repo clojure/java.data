@@ -10,7 +10,7 @@ This project follows the version scheme MAJOR.MINOR.COMMITS where MAJOR and MINO
 
 Latest stable release: 1.0.86
 
-* [All Released Versions](http://search.maven.org/#search%7Cga%7C1%7Corg.clojure%20java.data)
+* [All Released Versions](https://search.maven.org/#search%7Cga%7C1%7Corg.clojure%20java.data)
 * [Development Snapshot Versions](https://repository.sonatype.org/index.html#nexus-search;gav~org.clojure~java.data~~~)
 
 ### [CLI/`deps.edn`](https://clojure.org/reference/deps_and_cli) dependency information:
@@ -154,12 +154,9 @@ exception defense | none        | none
 ## Developer Information
 
 * [GitHub project](https://github.com/clojure/java.data)
-
-* [Bug Tracker](http://dev.clojure.org/jira/browse/JDATA)
-
-* [Continuous Integration](http://build.clojure.org/job/java.data/)
-
-* [Compatibility Test Matrix](http://build.clojure.org/job/java.data-test-matrix/)
+* [Bug Tracker](https://clojure.atlassian.net/browse/JDATA)
+* [Continuous Integration](https://build.clojure.org/job/java.data/)
+* [Compatibility Test Matrix](https://build.clojure.org/job/java.data-test-matrix/)
 
 ## Copyright and License
 
@@ -167,7 +164,7 @@ Copyright (c) Rich Hickey and contributors. All rights reserved.
 
 The use and distribution terms for this software are covered by the
 [Eclipse Public License
-1.0](http://opensource.org/licenses/eclipse-1.0.php) which can be
+1.0](https://opensource.org/licenses/eclipse-1.0.php) which can be
 found in the file epl.html at the root of this distribution.  By using
 this software in any fashion, you are agreeing to be bound by the
 terms of this license. You must not remove this notice, or any other,
