@@ -360,3 +360,17 @@
       (is (= "Dallas" (.. person getAddress getCity)))
       (is (= State/TX (.. person getAddress getState)))
       (is (= "75432" (.. person getAddress getZip))))))
+
+(deftest jdata-22
+  (testing "Properties with String keys"
+    (let [props (to-java java.util.Properties {"a" 1 "b" "two"})]
+      (is (= #{"a" "b"} (.stringPropertyNames props)))
+      (is (= "1" (.getProperty props "a")))
+      (is (= "two" (.getProperty props "b")))
+      (is (= "nope" (.getProperty props "c" "nope")))))
+  (testing "Properties with Keyword keys"
+    (let [props (to-java java.util.Properties {:a 1 :b "two"})]
+      (is (= #{"a" "b"} (.stringPropertyNames props)))
+      (is (= "1" (.getProperty props "a")))
+      (is (= "two" (.getProperty props "b")))
+      (is (= "nope" (.getProperty props "c" "nope"))))))

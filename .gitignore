@@ -1,2 +1,9 @@
-/target
+.classpath
+.clj-kondo/.cache
 .cpcache/
+.lsp/.cache
+.portal
+.project
+.settings
+.socket-repl-port
+/target

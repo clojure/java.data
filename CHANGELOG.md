@@ -1,5 +1,8 @@
 ## Change Log
 
+* Release 1.0.92 on 2021-10-16
+  * Support `to-java` for `java.util.Properties` and a hash map JDATA-22.
+
 * Release 1.0.86 on 2020-07-17
   * Add `from-java-deep` to guarantee deep conversion with same options as `from-java-shallow` [JDATA-21](https://clojure.atlassian.net/browse/JDATA-21).
   * Fixes bug in `from-java-shallow` for getters returning `Boolean` (the value was not canonicalized so `false` could be truthy).

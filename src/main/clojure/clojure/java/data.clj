@@ -249,6 +249,16 @@
           (apply setter [instance value]))))
     instance))
 
+(defmethod to-java [java.util.Properties clojure.lang.APersistentMap]
+  [_ props]
+  (reduce-kv (fn [^java.util.Properties p k v]
+               (if (or (symbol? k) (keyword? k))
+                 (.setProperty p (name k) (str v))
+                 (.setProperty p (str k)  (str v)))
+               p)
+             (java.util.Properties.)
+             props))
+
 (defmethod to-java [Object clojure.lang.APersistentMap] [^Class clazz props]
   (if (.isInterface clazz)
     (if (instance? clazz props)

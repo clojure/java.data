@@ -8,7 +8,7 @@ clojure-contrib
 
 This project follows the version scheme MAJOR.MINOR.COMMITS where MAJOR and MINOR provide some relative indication of the size of the change, but do not follow semantic versioning. In general, all changes endeavor to be non-breaking (by moving to new names rather than by breaking existing names). COMMITS is an ever-increasing counter of commits since the beginning of this repository.
 
-Latest stable release: 1.0.86
+Latest stable release: 1.0.92
 
 * [All Released Versions](https://search.maven.org/#search%7Cga%7C1%7Corg.clojure%20java.data)
 * [Development Snapshot Versions](https://repository.sonatype.org/index.html#nexus-search;gav~org.clojure~java.data~~~)
@@ -16,13 +16,13 @@ Latest stable release: 1.0.86
 ### [CLI/`deps.edn`](https://clojure.org/reference/deps_and_cli) dependency information:
 
 ```clojure
-org.clojure/java.data {:mvn/version "1.0.86"}
+org.clojure/java.data {:mvn/version "1.0.92"}
 ```
 
 ### Leiningen
 
 ```clojure
-[org.clojure/java.data "1.0.86"]
+[org.clojure/java.data "1.0.92"]
 ```
 
 ### Maven
@@ -31,7 +31,7 @@ org.clojure/java.data {:mvn/version "1.0.86"}
 <dependency>
     <groupId>org.clojure</groupId>
     <artifactId>java.data</artifactId>
-    <version>1.0.86</version>
+    <version>1.0.92</version>
 </dependency>
 ```
 
