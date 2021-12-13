@@ -1,6 +1,6 @@
 ## Change Log
 
-* Next
+* Release 1.0.95 on 2021-12-12
   * Update to latest tools.logging 1.2.1
 
 * Release 1.0.92 on 2021-10-16
