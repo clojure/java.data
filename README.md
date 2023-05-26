@@ -155,8 +155,7 @@ exception defense | none        | none
 
 * [GitHub project](https://github.com/clojure/java.data)
 * [Bug Tracker](https://clojure.atlassian.net/browse/JDATA)
-* [Continuous Integration](https://build.clojure.org/job/java.data/)
-* [Compatibility Test Matrix](https://build.clojure.org/job/java.data-test-matrix/)
+* [Continuous Integration](https://github.com/clojure/java.data/actions/workflows/test.yml)
 
 ## Copyright and License
 
