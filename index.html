@@ -1,7 +1,7 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>clojure.java.data - java.data 1.0.65-SNAPSHOT API documentation</title>
+    <title>clojure.java.data - java.data 1.0.96-SNAPSHOT API documentation</title>
     <link rel="icon" href="static/favicon.png" />
     <link rel="shortcut icon" href="static/favicon.png" />
     <link rel="stylesheet" href="static/clojure.css" type="text/css" media="all" />
@@ -25,7 +25,7 @@ namespace.
       <div id="leftcolumn"><div style="text-align: center;"></div>
 <div class="menu">
   <div class="WikiCustomNav WikiElement wiki">
-    <span class="toc-header"><span id="project-name">java.data</span> <span id="version">1.0.65-SNAPSHOT</span> API</span><br />
+    <span class="toc-header"><span id="project-name">java.data</span> <span id="version">1.0.96-SNAPSHOT</span> API</span><br />
     <ul>
       <li><a href="index.html" class="wiki_link">Overview</a></li>
       <li><a href="api-index.html" class="wiki_link">API Index</a></li>
@@ -57,7 +57,19 @@ namespace.
       <a href="#clojure.java.data/*to-java-object-missing-setter*" class="toc-entry-anchor">*to-java-object-missing-setter*</a>
       
     </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.data/from-java" class="toc-entry-anchor">from-java</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.data/from-java-deep" class="toc-entry-anchor">from-java-deep</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.data/from-java-shallow" class="toc-entry-anchor">from-java-shallow</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.java.data/set-properties" class="toc-entry-anchor">set-properties</a>
+      
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.java.data/to-java" class="toc-entry-anchor">to-java</a>
       
     </div>
   </div><div class="toc-section" style="margin-left: 1em;">
@@ -73,7 +85,7 @@ namespace.
 </div>
 </div>
                 <div id="content-tag"><h1 id="overview">API for <span id="clojure.java.data">clojure.java.data</span>
-  - <span id="header-project">java.data</span> <span id="header-version">1.0.65-SNAPSHOT</span><span id="header-status-block"> (<span id="header-status">in development</span>)</span>
+  - <span id="header-project">java.data</span> <span id="header-version">1.0.96-SNAPSHOT</span><span id="header-status-block"> (<span id="header-status">in development</span>)</span>
   </h1>
 <span id="author-line">by <span id="author-name">Cosmin Stejerean, Sean Corfield</span><br /></span>
 <br />Full namespace name: <span id="long-name">clojure.java.data</span>
@@ -101,7 +113,69 @@ default object case, using one of :ignore, :log, :error</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/java.data/blob/259b7ed9a25de5c03856633296d19deb18ea3e28/src/main/clojure/clojure/java/data.clj#L18">Source</a>
+    <a id="var-source" href="https://github.com/clojure/java.data/blob/4085ee0018e0d0b91ecfd13b4f40c4b28b08e4ae/src/main/clojure/clojure/java/data.clj#L18">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.data/from-java">from-java</h2>
+    <span id="var-type">multimethod</span><br />
+    <pre id="var-usage">No usage documentation available</pre>
+    <pre id="var-docstr">Convert a Java object to a Clojure map.</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/java.data/blob/4085ee0018e0d0b91ecfd13b4f40c4b28b08e4ae/src/main/clojure/clojure/java/data.clj#L37">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.data/from-java-deep">from-java-deep</h2>
+    <span id="var-type">multimethod</span><br />
+    <pre id="var-usage">No usage documentation available</pre>
+    <pre id="var-docstr">Convert a Java object to a Clojure map (converting deeply).
+
+The second argument is a hash map that offers some control over the
+conversion:
+* :add-class -- if true, add :class with the actual class of the object
+        being converted -- this mimics clojure.core/bean.
+* :exceptions -- controls how getter exceptions should be handled:
+        * :group -- return an :exceptions hash map in the object that
+              contains all the properties that failed, with their exceptions,
+        * :omit -- ignore exceptions and omit the properties that caused them,
+        * :qualify -- return the exception as :&lt;property&gt;/exception and
+              omit the property itself,
+        * :return -- simply return the exception as the value of the property.
+* :omit -- a set of properties (keywords) to omit from the conversion
+        so that unsafe methods are not called (this applies across the whole
+        recursive/deep conversion).</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/java.data/blob/4085ee0018e0d0b91ecfd13b4f40c4b28b08e4ae/src/main/clojure/clojure/java/data.clj#L40">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.data/from-java-shallow">from-java-shallow</h2>
+    <span id="var-type">multimethod</span><br />
+    <pre id="var-usage">No usage documentation available</pre>
+    <pre id="var-docstr">Convert a Java object to a Clojure map (but do not convert deeply).
+
+The second argument is a hash map that offers some control over the
+conversion:
+* :add-class -- if true, add :class with the actual class of the object
+        being converted -- this mimics clojure.core/bean.
+* :exceptions -- controls how getter exceptions should be handled:
+        * :group -- return an :exceptions hash map in the object that
+              contains all the properties that failed, with their exceptions,
+        * :omit -- ignore exceptions and omit the properties that caused them,
+        * :qualify -- return the exception as :&lt;property&gt;/exception and
+              omit the property itself,
+        * :return -- simply return the exception as the value of the property.
+* :omit -- a set of properties (keywords) to omit from the conversion
+        so that unsafe methods are not called.</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/java.data/blob/4085ee0018e0d0b91ecfd13b4f40c4b28b08e4ae/src/main/clojure/clojure/java/data.clj#L58">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -114,7 +188,28 @@ set the properties.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/java.data/blob/259b7ed9a25de5c03856633296d19deb18ea3e28/src/main/clojure/clojure/java/data.clj#L211">Source</a>
+    <a id="var-source" href="https://github.com/clojure/java.data/blob/4085ee0018e0d0b91ecfd13b4f40c4b28b08e4ae/src/main/clojure/clojure/java/data.clj#L298">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.java.data/to-java">to-java</h2>
+    <span id="var-type">multimethod</span><br />
+    <pre id="var-usage">No usage documentation available</pre>
+    <pre id="var-docstr">Convert Clojure data to an instance of the specified Java class.
+Several basic types have obvious conversions, but for a hash map
+reflection is used to set the properties. If the class is an interface, we
+can't create an instance of it, unless the Clojure map already implements it.
+
+When java.time.Instant is available (Java 8+), we can convert a hash map
+containing :nano and :epochSecond to Instant, as this is the reverse of
+Instant-&gt;map.
+
+A XMLGregorianCalendar object can be constructed from the following keys
+:year, :month, :day, :hour, :minute, :second, and :timezone.</pre>
+    <pre id="var-specs"></pre>
+    
+    
+    <a id="var-source" href="https://github.com/clojure/java.data/blob/4085ee0018e0d0b91ecfd13b4f40c4b28b08e4ae/src/main/clojure/clojure/java/data.clj#L24">Source</a>
   </div>
 </div>
 
@@ -184,7 +279,7 @@ The following options may be provided:
           </div>
 	</div>
 	<div id="foot">
-	  <div id="copyright" style="text-align: center;">Copyright 2007-2019 by Rich Hickey and the various contributors</div>
+	  <div id="copyright" style="text-align: center;">Copyright 2007-2023 by Rich Hickey and the various contributors</div>
 	</div>
       </div>
       <div id="DesignedBy">Logo &amp; site design by <a href="http://www.tomhickey.com" title="Visit Tom Hickey's website.">Tom Hickey</a>.<br />
