@@ -1,7 +1,9 @@
+.calva/output-window
 .classpath
 .clj-kondo/.cache
 .cpcache/
 .lsp/.cache
+.nrepl-port
 .portal
 .project
 .settings

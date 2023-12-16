@@ -10,15 +10,22 @@
   ^{:author "Cosmin Stejerean, Sean Corfield",
     :doc "Support for recursively converting Java beans to Clojure and vice versa."}
   clojure.java.data
-  (:require [clojure.string :as str]
-            [clojure.tools.logging :as logger]))
+  (:require [clojure.string :as str]))
 
 (set! *warn-on-reflection* true)
 
 (def ^:dynamic
   *to-java-object-missing-setter*
   "Specify the behavior of missing setters in to-java in the
-  default object case, using one of :ignore, :log, :error"
+  default object case, using one of :ignore, :log, :error
+
+  The default (:ignore) is to ignore missing setters.
+  * :log uses clojure.tools.logging/info to log a message.
+  * :error throws a NoSuchFieldException.
+
+  If you bind this to :log, you must have org.clojure/tools.logging
+  as a dependency in your project. Otherwise, :log will behave like
+  :error and throw a NoSuchFieldException."
   :ignore)
 
 (defmulti to-java
@@ -203,12 +210,28 @@
   (.invoke (.getDeclaredMethod enum "valueOf" (into-array [String]))
            nil (into-array [value])))
 
+(declare log-or-throw)
+(defmacro defn-log-or-throw []
+  (try
+    (require 'clojure.tools.logging)
+    `(defn ~'log-or-throw [message#]
+       (clojure.tools.logging/info message#))
+    (catch Throwable _
+      `(defn ~'log-or-throw [message#]
+         (throw (new NoSuchFieldException message#))))))
+(defn-log-or-throw)
+
 (defn- throw-log-or-ignore-missing-setter [key ^Class clazz]
   (let [message (str "Missing setter for " key " in " (.getCanonicalName clazz))]
     (cond (= *to-java-object-missing-setter* :error)
           (throw (new NoSuchFieldException message))
           (= *to-java-object-missing-setter* :log)
-          (logger/info message))))
+          (log-or-throw message))))
+
+(comment
+  (binding [*to-java-object-missing-setter* :log]
+    (throw-log-or-ignore-missing-setter :foo String))
+  )
 
 ;; feature testing macro, based on suggestion from Chas Emerick:
 
