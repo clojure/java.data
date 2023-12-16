@@ -1,6 +1,6 @@
 ## Change Log
 
-* Release 1.1.next in progress
+* Release 1.1.103 on 2023-12-16
   * IMPORTANT: `org.clojure/tools.logging` is no longer a dependency. If you currently to bind `*to-java-object-missing-setter*` to `:log` and you do not otherwise have a dependency on `org.clojure/tools.logging` you will need to that to your project's direct dependencies.
 
 * Release 1.0.95 on 2021-12-12
