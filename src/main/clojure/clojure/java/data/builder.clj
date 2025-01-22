@@ -43,7 +43,7 @@
                          (.getName clazz))))
           (first builds))))))
 
-(defn- find-setters [^Class builder methods opts]
+(defn- find-setters [^Class builder methods props opts]
   (let [candidates
         (filter (fn [^java.lang.reflect.Method m]
                   (and (= 1 (alength ^"[Ljava.lang.Class;" (.getParameterTypes m)))
@@ -51,23 +51,42 @@
                        (or (not (re-find #"^set[A-Z]" (.getName m)))
                            (not (:ignore-setters? opts)))))
                 methods)]
-    (reduce (fn [setter-map ^java.lang.reflect.Method m]
-              (let [prop (keyword
-                          (cond (re-find #"^set[A-Z]" (.getName m))
-                                (let [^String n (subs (.getName m) 3)]
-                                  (str (Character/toLowerCase (.charAt n 0)) (subs n 1)))
-                                (re-find #"^with[A-Z]" (.getName m))
-                                (let [^String n (subs (.getName m) 4)]
-                                  (str (Character/toLowerCase (.charAt n 0)) (subs n 1)))
-                                :else
-                                (.getName m)))]
+    (->> candidates
+         (reduce
+          (fn [setter-map ^java.lang.reflect.Method m]
+            (let [prop (keyword
+                        (cond (re-find #"^set[A-Z]" (.getName m))
+                              (let [^String n (subs (.getName m) 3)]
+                                (str (Character/toLowerCase (.charAt n 0)) (subs n 1)))
+                              (re-find #"^with[A-Z]" (.getName m))
+                              (let [^String n (subs (.getName m) 4)]
+                                (str (Character/toLowerCase (.charAt n 0)) (subs n 1)))
+                              :else
+                              (.getName m)))]
+              (if (contains? props prop)
                 (if (contains? setter-map prop)
-                  (throw (IllegalArgumentException.
-                          (str "Duplicate setter found for " prop
-                               " in " (.getName builder) " class")))
-                  (assoc setter-map prop (#'j/make-setter-fn m)))))
-            {}
-            candidates)))
+                  (let [clazz1 (#'j/get-setter-type (second (get setter-map prop)))
+                        clazz2 (#'j/get-setter-type m)
+                        p-val  (get props prop)]
+                    (cond (and (instance? clazz1 p-val)
+                               (not (instance? clazz2 p-val)))
+                          setter-map ; existing setter is a better match:
+                          (and (not (instance? clazz1 p-val))
+                               (instance? clazz2 p-val))
+                          ;; this setter is a better match:
+                          (assoc setter-map prop [(#'j/make-setter-fn m) m])
+                          :else ; neither is an obviously better match:
+                          (throw (IllegalArgumentException.
+                                  (str "Duplicate setter found for " prop
+                                       " in " (.getName builder) " class")))))
+                  (assoc setter-map prop [(#'j/make-setter-fn m) m]))
+                  ;; if we are not trying to set this property, ignore the setter:
+                setter-map)))
+          {})
+          (reduce-kv
+           (fn [m k v]
+             (assoc m k (first v)))
+           {}))))
 
 (defn- build-on [instance setters ^Class clazz props]
   (reduce-kv (fn [builder k v]
@@ -94,7 +113,7 @@
   ;; * B setPropertyName( T )
   ;; treat both as setters; thrown exception if they clash
   ;; (maybe an option to ignore setXyz( T ) methods?)
-  (find-setters java.util.Locale$Builder (.getMethods java.util.Locale$Builder) {})
+  (find-setters java.util.Locale$Builder (.getMethods java.util.Locale$Builder) {} {})
 
   ;; general pattern will be to:
   ;; * get the builder class somehow
@@ -113,7 +132,7 @@
         ^Class builder (get-builder-class clazz)]
     (.invoke (get-builder clazz (.getMethods builder) opts)
              (build-on (j/to-java builder ^clojure.lang.APersistentMap {})
-                       (find-setters builder (.getMethods builder) opts)
+                       (find-setters builder (.getMethods builder) props opts)
                        builder
                        props)
              nil)))
@@ -161,7 +180,7 @@
   ([^Class clazz ^Class builder instance props opts]
    (.invoke (get-builder clazz (.getMethods builder) opts)
             (build-on instance
-                      (find-setters builder (.getMethods builder) opts)
+                      (find-setters builder (.getMethods builder) props opts)
                       builder
                       props)
             nil)))
