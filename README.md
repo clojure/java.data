@@ -1,8 +1,18 @@
 # java.data
 
 Functions for recursively converting Java beans to Clojure and vice
-versa. Future home of Java beans and properties support from the old
-clojure-contrib
+versa.
+
+You can perform shallow conversions and deep conversions, and `java.data`
+provides quite a bit of control over the conversion process.
+
+Conversion of Clojure maps etc to specific Java types is generally fairly
+straightforward, either via regular construction or via "builder" APIs.
+
+Some Java types, however, are going to be difficult to convert to Clojure,
+e.g., Protobuf is particularly problematic because it is all recursive metadata
+about types and values: even when you use `:omit` to avoid deep recursion in
+an automated conversion, you are not necessarily going to get a useful result.
 
 ## Releases and Dependency Information
 
@@ -58,6 +68,11 @@ org.clojure/java.data {:mvn/version "1.3.113"}
 
 ;; represent a javaValue instance in a Clojure data structure:
 (j/from-java javaValue)
+
+;; from-java is the legacy, default API and offers no control over the
+;; conversion process; from-java-shallow and from-java-deep accept options
+;; that provide control over which properties to omit, how to handle property
+;; methods that fail, etc, and should be preferred over the default from-java
 
 ;; populate javaValue instance from a Clojure property hash map
 ;; (calls a setter for each key/value pair in the hash map):
