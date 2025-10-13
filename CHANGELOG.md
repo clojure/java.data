@@ -21,7 +21,7 @@
   * Fixes bug in `from-java-shallow` for getters returning `Boolean` (the value was not canonicalized so `false` could be truthy).
 
 * Release 1.0.78 on 2020-05-31
-  * Make exception handling in shallow conversions configurable: an `:exceptions` option may be `:group`, `:omit`, `:quaify`, or `:return`.
+  * Make exception handling in shallow conversions configurable: an `:exceptions` option may be `:group`, `:omit`, `:qualify`, or `:return`.
   * Fix bug in shallow array handling.
 
 * Release 1.0.73 on 2020-05-31
