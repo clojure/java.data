@@ -1,5 +1,8 @@
 ## Change Log
 
+* next on 2026-01-02
+  * Update parent pom and tools.logging versions
+
 * Release 1.3.113 on 2025-01-23
   * In builders, for overloaded setters (for which we have matching properties), try to pick the "obviously better" match (using `instance?` against the property value), and only throw if we can't pick one [JDATA-25](https://clojure.atlassian.net/browse/JDATA-25).
   * In builders, ignore setters for which we do not have matching properties [JDATA-24](https://clojure.atlassian.net/browse/JDATA-24).
